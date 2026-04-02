@@ -1,49 +1,45 @@
 package org.example.servlet;
 
-import org.example.model.User;
+import org.example.dao.*;
+import org.example.model.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.util.*;
 
 @WebServlet("/dashboard")
 public class DashboardServlet extends HttpServlet {
 
-    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Session check
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
 
         User user = (User) session.getAttribute("user");
-        String role = user.getRole();
+        String role = user.getRole().toLowerCase();
 
-        System.out.println("========== DASHBOARD REDIRECT ==========");
-        System.out.println("User: " + user.getUserId());
-        System.out.println("Role: " + role);
-
-        // ========== REDIRECT BASED ON ROLE ==========
-        if ("Student".equalsIgnoreCase(role)) {
-            response.sendRedirect("dashboard/student/index.jsp");
-
-        } else if ("Kitchen_Staff".equalsIgnoreCase(role)) {
-            response.sendRedirect("dashboard/kitchen_staff/kitchen_dashboard.jsp");
-
-        } else if ("Laundry_Staff".equalsIgnoreCase(role)) {
-            response.sendRedirect("laundry/staff/dashboard");
-
-        } else if ("Cleaning_Staff".equalsIgnoreCase(role)) {
-            response.sendRedirect("dashboard/cleaning_staff/dashboard.jsp");
-
-        } else if ("Owner".equalsIgnoreCase(role)) {
-            response.sendRedirect("dashboard/owner/index.jsp");
-
-        } else {
-            response.sendRedirect("index.jsp");
+        // Role-based redirect
+        switch(role) {
+            case "student":
+                response.sendRedirect(request.getContextPath() + "/dashboard/student/");
+                break;
+            case "owner":
+                response.sendRedirect(request.getContextPath() + "/dashboard/owner/");
+                break;
+            case "cleaning_staff":
+            case "laundry_staff":
+            case "kitchen_staff":
+            case "it_supporter":
+                response.sendRedirect(request.getContextPath() + "/dashboard/staff/");
+                break;
+            default:
+                response.sendRedirect(request.getContextPath() + "/dashboard/student/");
         }
     }
 }

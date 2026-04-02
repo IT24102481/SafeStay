@@ -16,44 +16,22 @@ public class LoginServlet extends HttpServlet {
         String userId = request.getParameter("userId");
         String password = request.getParameter("password");
 
-        System.out.println("========== LOGIN ATTEMPT ==========");
-        System.out.println("User ID: " + userId);
-
         UserDAO userDAO = new UserDAO();
         User user = userDAO.login(userId, password);
 
         if (user != null) {
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
-            session.setAttribute("userId", user.getUserId());
-            session.setAttribute("fullname", user.getFullName());
-            session.setAttribute("role", user.getRole());
+            session.setAttribute("loginTime", new java.util.Date());
 
-            System.out.println("✅ Login SUCCESSFUL! Role: " + user.getRole());
+            // IMPORTANT: Remove any existing attributes that might cause loops
+            session.removeAttribute("error");
+            session.removeAttribute("errorMessage");
 
-            // ========== REDIRECT BASED ON ROLE ==========
-            if ("Student".equalsIgnoreCase(user.getRole())) {
-                // Student goes to student dashboard
-                response.sendRedirect("dashboard/student/index.jsp");  // නව student dashboard එකට
-
-            } else if ("Kitchen_Staff".equalsIgnoreCase(user.getRole())) {
-                response.sendRedirect("dashboard/kitchen_staff/kitchen_dashboard.jsp");
-
-            } else if ("Laundry_Staff".equalsIgnoreCase(user.getRole())) {
-                response.sendRedirect("laundry/staff/dashboard");
-
-            } else if ("Cleaning_Staff".equalsIgnoreCase(user.getRole())) {
-                response.sendRedirect("dashboard/cleaning_staff/cleaning_dashboard_staff.jsp");
-
-            } else if ("Owner".equalsIgnoreCase(user.getRole())) {
-                response.sendRedirect("dashboard/owner/index.jsp");
-
-            } else {
-                response.sendRedirect("index.jsp");
-            }
+            // Redirect to DashboardServlet
+            response.sendRedirect("dashboard");
 
         } else {
-            System.out.println("❌ Login FAILED for: " + userId);
             request.setAttribute("errorMessage", "Invalid ID or Password!");
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }

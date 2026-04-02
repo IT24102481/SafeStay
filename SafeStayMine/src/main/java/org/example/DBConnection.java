@@ -7,12 +7,12 @@ import java.sql.SQLException;
 public class DBConnection {
 
     private static final String URL = "jdbc:sqlserver://localhost:1433;databaseName=hostelManagementDB;encrypt=false;trustServerCertificate=true;";
-    private static final String USER = "admin";
-    private static final String PASSWORD = "123456";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "StrongPassword123!"; // <--- මෙතනට ඔයාගේ SQL Password එක ලියන්න
 
     public static Connection getConnection() throws SQLException {
         try {
-            // SQL Server Driver  load
+            // SQL Server Driver එක load කිරීම
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             return DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (ClassNotFoundException e) {

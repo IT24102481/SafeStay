@@ -45,18 +45,20 @@ public class AttendanceServlet extends HttpServlet {
                 if (studentId == null) studentId = user.getUserId();
 
                 // Get last 30 days attendance
-                List<Attendance> history = attendanceDAO.getAllAttendance(studentId, 30);
+                List<Attendance> history = attendanceDAO.getAttendanceInRange(studentId, 30);
                 Map<String, Object> stats = attendanceDAO.getStats(studentId, 30);
-                boolean hasActive = attendanceDAO.hasActiveCheckIn(studentId);
-                int todayCount = attendanceDAO.getTodayCheckInCount(studentId);
-                List<Attendance> todayCheckIns = attendanceDAO.getTodayCheckIns(studentId);
+                boolean checkedIn = attendanceDAO.isCheckedInToday(studentId);
+                boolean checkedOut = attendanceDAO.isCheckedOutToday(studentId);
+                String checkInTime = attendanceDAO.getCheckInTime(studentId);
+                String checkOutTime = attendanceDAO.getCheckOutTime(studentId);
 
                 String json = "{";
                 json += "\"history\":" + convertListToJson(history) + ",";
                 json += "\"stats\":" + convertMapToJson(stats) + ",";
-                json += "\"hasActive\":" + hasActive + ",";
-                json += "\"todayCount\":" + todayCount + ",";
-                json += "\"todayCheckIns\":" + convertListToJson(todayCheckIns);
+                json += "\"checkedIn\":" + checkedIn + ",";
+                json += "\"checkedOut\":" + checkedOut + ",";
+                json += "\"checkInTime\":\"" + (checkInTime != null ? checkInTime : "") + "\",";
+                json += "\"checkOutTime\":\"" + (checkOutTime != null ? checkOutTime : "") + "\"";
                 json += "}";
 
                 out.print(json);
@@ -85,7 +87,7 @@ public class AttendanceServlet extends HttpServlet {
 
         try {
             if (pathInfo.equals("/checkin")) {
-                // CHECK-IN (Multiple times allowed)
+                // CHECK-IN
                 String studentId = request.getParameter("studentId");
                 String status = request.getParameter("status");
                 String remarks = request.getParameter("remarks");
@@ -97,13 +99,18 @@ public class AttendanceServlet extends HttpServlet {
                 } else if (status == null || status.trim().isEmpty()) {
                     json += "\"success\":false,\"message\":\"Status required\"";
                 } else {
-                    boolean success = attendanceDAO.checkIn(studentId, status, user.getUserId(), remarks);
-
-                    if (success) {
-                        json += "\"success\":true,\"message\":\"Check-in successful at " +
-                                timeFormat.format(new Date()) + "\"";
+                    if (attendanceDAO.isCheckedInToday(studentId)) {
+                        json += "\"success\":false,\"message\":\"Already checked in today at " +
+                                attendanceDAO.getCheckInTime(studentId) + "\"";
                     } else {
-                        json += "\"success\":false,\"message\":\"Check-in failed\"";
+                        boolean success = attendanceDAO.checkIn(studentId, status, user.getUserId(), remarks);
+
+                        if (success) {
+                            json += "\"success\":true,\"message\":\"Check-in successful at " +
+                                    timeFormat.format(new Date()) + "\"";
+                        } else {
+                            json += "\"success\":false,\"message\":\"Check-in failed\"";
+                        }
                     }
                 }
 
@@ -116,8 +123,11 @@ public class AttendanceServlet extends HttpServlet {
 
                 String json = "{";
 
-                if (!attendanceDAO.hasActiveCheckIn(studentId)) {
-                    json += "\"success\":false,\"message\":\"No active check-in found\"";
+                if (!attendanceDAO.isCheckedInToday(studentId)) {
+                    json += "\"success\":false,\"message\":\"Please check-in first\"";
+                } else if (attendanceDAO.isCheckedOutToday(studentId)) {
+                    json += "\"success\":false,\"message\":\"Already checked out today at " +
+                            attendanceDAO.getCheckOutTime(studentId) + "\"";
                 } else {
                     boolean success = attendanceDAO.checkOut(studentId);
 

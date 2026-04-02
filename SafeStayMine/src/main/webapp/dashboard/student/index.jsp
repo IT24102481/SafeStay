@@ -491,11 +491,11 @@
             <i class="fas fa-qrcode"></i>
             <span>Mark Attendance</span>
         </div>
-        <div class="quick-action" onclick="location.href='laundry-dashboard.jsp'">
+        <div class="quick-action" onclick="location.href='laundry.jsp'">
             <i class="fas fa-tshirt"></i>
             <span>Book Laundry</span>
         </div>
-        <div class="quick-action" onclick="location.href='cleaning-dashboard.jsp'">
+        <div class="quick-action" onclick="location.href='cleaning.jsp'">
             <i class="fas fa-broom"></i>
             <span>Request Cleaning</span>
         </div>
@@ -503,17 +503,14 @@
             <i class="fas fa-credit-card"></i>
             <span>Pay Rent</span>
         </div>
-        <div class="quick-action" onclick="location.href='room-booking.jsp'">
+        <div class="quick-action" onclick="location.href='<%= request.getContextPath() %>/rooms'">
             <i class="fas fa-bed"></i>
             <span>Book Room</span>
         </div>
-        <div class="quick-action" onclick="location.href='meal-dashboard.jsp'">
+
+        <div class="quick-action" onclick="location.href='meals.jsp'">
             <i class="fas fa-utensils"></i>
             <span>Order Meals</span>
-        </div>
-        <div class="quick-action" onclick="location.href='<%= request.getContextPath() %>/dashboard/student/review-dashboard.jsp'">
-            <i class="fas fa-star" style="color: #fbbf24;"></i>
-            <span>Rate & Review</span>
         </div>
     </div>
 

@@ -6,8 +6,6 @@ public class User {
     private String password;
     private String role;
     private String fullName;
-    private String roomNo;
-    private int floorNo;
 
     public User() {}
 
@@ -21,8 +19,4 @@ public class User {
     public void setRole(String role) { this.role = role; }
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
-    public String getRoomNo() { return roomNo; }
-    public void setRoomNo(String roomNo) { this.roomNo = roomNo; }
-    public int getFloorNo() { return floorNo; }
-    public void setFloorNo(int floorNo) { this.floorNo = floorNo; }
 }
