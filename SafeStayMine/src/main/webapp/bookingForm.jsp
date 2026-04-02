@@ -20,9 +20,9 @@
     <title>Book Room <%= room.getRoomNumber() %> - SafeStay</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f4f5f7;
@@ -47,7 +47,7 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
             font-size: 15px;
             min-height: 100vh;
             background-image:
@@ -141,80 +141,78 @@
         /* ── FORM CARD ── */
         .form-card {
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: none;
             border-radius: var(--radius);
             overflow: hidden;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.05);
             animation: fadeUp 0.4s ease both;
         }
 
         /* ── SECTION BLOCKS ── */
         .form-section {
-            padding: 1.5rem 1.75rem;
+            padding: 1.75rem 2rem;
             border-bottom: 1px solid var(--border);
+            background: var(--surface);
         }
         .form-section:last-child { border-bottom: none; }
 
         .section-title {
             font-family: 'Fraunces', serif;
-            font-size: 1rem;
+            font-size: 1.15rem;
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.75rem;
         }
         .section-title i {
             color: var(--accent);
-            font-size: 0.88rem;
-            width: 20px;
+            font-size: 1rem;
+            width: 24px;
             text-align: center;
         }
         .section-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: var(--accent-dim);
             color: var(--accent);
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
             flex-shrink: 0;
         }
 
         /* ── FORM CONTROLS ── */
         .form-label {
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--text-muted);
-            margin-bottom: 0.4rem;
+            color: var(--text);
+            margin-bottom: 0.5rem;
             display: block;
         }
         .form-control, .form-select {
-            background: var(--surface-2);
-            border: 1px solid var(--border);
+            background: #f8f9fc;
+            border: 1px solid #e1e3ea;
             border-radius: var(--radius-sm);
             color: var(--text);
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.9rem;
-            padding: 0.6rem 0.9rem;
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            padding: 0.7rem 1rem;
+            transition: all 0.2s;
             width: 100%;
         }
         .form-control:focus, .form-select:focus {
             background: var(--surface);
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-dim);
+            box-shadow: 0 0 0 4px var(--accent-glow);
             outline: none;
-            color: var(--text);
         }
-        .form-control::placeholder { color: var(--text-muted); opacity: 0.6; }
+        .form-control::placeholder { color: var(--text-muted); opacity: 0.5; }
         .form-select option { background: var(--surface); color: var(--text); }
 
         .field-group {
@@ -242,48 +240,49 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            gap: 0.75rem;
-            padding: 1.5rem 1.75rem;
-            background: var(--surface-2);
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            background: #fafbfc;
             border-top: 1px solid var(--border);
             flex-wrap: wrap;
         }
         .btn-cancel {
             background: transparent;
-            border: 1px solid var(--border);
+            border: 2px solid transparent;
             color: var(--text-muted);
-            border-radius: var(--radius-sm);
-            font-size: 0.88rem;
-            font-weight: 500;
-            padding: 0.65rem 1.4rem;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
-        }
-        .btn-cancel:hover { border-color: var(--danger); color: var(--danger); }
-        .btn-submit {
-            background: var(--accent);
-            border: 1px solid var(--accent);
-            color: #fff;
-            border-radius: var(--radius-sm);
-            font-size: 0.88rem;
+            border-radius: 30px;
+            font-size: 0.95rem;
             font-weight: 600;
             padding: 0.65rem 1.6rem;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-cancel:hover { background: rgba(0,0,0,0.05); color: var(--text); }
+        .btn-submit {
+            background: var(--accent);
+            border: 2px solid var(--accent);
+            color: #fff;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.65rem 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: pointer;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 6px 16px var(--accent-glow);
         }
         .btn-submit:hover {
-            background: #4d8a0c;
-            border-color: #4d8a0c;
-            box-shadow: 0 4px 16px var(--accent-glow);
-            transform: translateY(-1px);
+            background: #155bb5;
+            border-color: #155bb5;
+            box-shadow: 0 8px 24px rgba(29,111,216,0.3);
+            transform: translateY(-2px);
         }
 
         /* ── SIDEBAR ── */
@@ -291,22 +290,25 @@
 
         .sidebar-card {
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: none;
             border-radius: var(--radius);
             overflow: hidden;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.05);
             animation: fadeUp 0.45s ease 0.08s both;
+            position: sticky;
+            top: 5rem;
         }
         .sidebar-card-header {
-            padding: 1rem 1.25rem;
+            padding: 1.25rem 1.5rem;
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 0.55rem;
+            gap: 0.75rem;
+            background: var(--surface);
         }
         .sidebar-card-header h6 {
             font-family: 'Fraunces', serif;
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--text);
             margin: 0;
@@ -351,7 +353,7 @@
         }
         .payment-row.total .pay-val {
             font-family: 'Fraunces', serif;
-            font-size: 1.15rem;
+            font-size: 1.45rem;
             font-weight: 600;
             color: var(--accent);
         }
@@ -359,12 +361,13 @@
         .pay-val { color: var(--text); font-weight: 600; }
 
         .empty-summary {
-            padding: 1.25rem;
+            padding: 2rem 1.25rem;
             text-align: center;
             color: var(--text-muted);
-            font-size: 0.83rem;
+            font-size: 0.95rem;
+            background: #fafafa;
         }
-        .empty-summary i { display: block; font-size: 1.5rem; margin-bottom: 0.5rem; opacity: 0.3; }
+        .empty-summary i { display: block; font-size: 2rem; margin-bottom: 1rem; opacity: 0.2; color: var(--accent); }
 
         /* ── ANIMATIONS ── */
         @keyframes fadeUp {

@@ -19,11 +19,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= pageTitle %> - SafeStay Hostel</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <style>
-        :root {
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+        <style>
+            :root {
             --bg: #f4f5f7;
             --surface: #ffffff;
             --surface-2: #f0f1f4;
@@ -46,7 +46,7 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
             font-size: 15px;
             min-height: 100vh;
             background-image:
@@ -93,6 +93,31 @@
             color: var(--danger);
         }
 
+        /* ── BACK BUTTON ── */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.6rem 1.25rem;
+            border-radius: 30px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .btn-back:hover {
+            color: var(--accent);
+            border-color: var(--accent-dim);
+            background: var(--surface-2);
+            transform: translateX(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        }
+
         /* ── MAIN CONTAINER ── */
         .main-container {
             max-width: 1280px;
@@ -104,50 +129,54 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 2.5rem;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
         }
         @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
 
         .stat-card {
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: none;
             border-radius: var(--radius);
-            padding: 1.4rem 1.6rem;
+            padding: 1.75rem;
             position: relative;
             overflow: hidden;
-            transition: transform 0.25s, border-color 0.25s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: transform 0.25s, box-shadow 0.25s;
         }
         .stat-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(255,255,255,0.13);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
         }
         .stat-card::before {
             content: '';
             position: absolute;
             inset: 0;
-            opacity: 0.06;
-            border-radius: inherit;
+            opacity: 0.12;
         }
-        .stat-card.s-primary::before  { background: var(--info); }
-        .stat-card.s-success::before  { background: var(--success); }
-        .stat-card.s-warning::before  { background: var(--warning); }
-        .stat-card.s-info::before     { background: var(--accent); }
+        .stat-card.s-primary::before  { background: linear-gradient(135deg, var(--info), transparent); }
+        .stat-card.s-success::before  { background: linear-gradient(135deg, var(--success), transparent); }
+        .stat-card.s-warning::before  { background: linear-gradient(135deg, var(--warning), transparent); }
+        .stat-card.s-info::before     { background: linear-gradient(135deg, var(--accent), transparent); }
 
         .stat-label {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.05em;
             color: var(--text-muted);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
         }
         .stat-value {
             font-family: 'Fraunces', serif;
-            font-size: 2.4rem;
+            font-size: 2.8rem;
             font-weight: 600;
             line-height: 1;
+            position: relative;
+            z-index: 1;
         }
         .stat-card.s-primary  .stat-value { color: var(--info); }
         .stat-card.s-success  .stat-value { color: var(--success); }
@@ -155,10 +184,11 @@
         .stat-card.s-info     .stat-value { color: var(--accent); }
         .stat-icon {
             position: absolute;
-            right: 1.2rem;
-            top: 1.2rem;
-            font-size: 1.3rem;
-            opacity: 0.2;
+            right: 1.5rem;
+            top: 1.5rem;
+            font-size: 1.5rem;
+            opacity: 0.15;
+            z-index: 1;
         }
         .stat-card.s-primary  .stat-icon { color: var(--info); }
         .stat-card.s-success  .stat-icon { color: var(--success); }
@@ -184,7 +214,7 @@
         .filter-bar {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.75rem;
             align-items: center;
         }
 
@@ -193,20 +223,23 @@
             background: var(--surface);
             border: 1px solid var(--border);
             color: var(--text-muted);
-            border-radius: 8px;
-            font-size: 0.82rem;
-            font-weight: 500;
-            padding: 0.45rem 1rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
             text-decoration: none;
-            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.5rem;
             white-space: nowrap;
         }
         .btn-filter:hover {
-            border-color: rgba(255,255,255,0.2);
+            border-color: rgba(0,0,0,0.2);
             color: var(--text);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
         }
         .btn-filter.active, .btn-filter:active {
             background: var(--accent-dim);
@@ -252,62 +285,61 @@
         /* ── ROOM CARD ── */
         .room-card {
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
+            border: none;
+            border-radius: calc(var(--radius) * 1.25);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .room-card:hover {
-            transform: translateY(-6px);
-            border-color: rgba(255,255,255,0.14);
-            box-shadow: 0 20px 48px rgba(0,0,0,0.45);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 48px rgba(0,0,0,0.08);
         }
 
         .room-image-wrap {
             position: relative;
             overflow: hidden;
+            aspect-ratio: 4/3;
         }
         .room-image {
             width: 100%;
-            height: 195px;
+            height: 100%;
             object-fit: cover;
             display: block;
-            transition: transform 0.5s ease;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .room-card:hover .room-image { transform: scale(1.04); }
+        .room-card:hover .room-image { transform: scale(1.08); }
 
         .room-status-badge {
             position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
+            top: 1rem;
+            right: 1rem;
             font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.06em;
+            font-weight: 700;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            padding: 0.3rem 0.7rem;
-            border-radius: 20px;
-            backdrop-filter: blur(8px);
+            padding: 0.4rem 0.85rem;
+            border-radius: 30px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .badge-available {
-            background: rgba(74,222,128,0.2);
-            border: 1px solid rgba(74,222,128,0.5);
+            background: rgba(255,255,255,0.9);
             color: var(--success);
         }
         .badge-partial {
-            background: rgba(251,191,36,0.2);
-            border: 1px solid rgba(251,191,36,0.5);
+            background: rgba(255,255,255,0.9);
             color: var(--warning);
         }
         .badge-full {
-            background: rgba(248,113,113,0.2);
-            border: 1px solid rgba(248,113,113,0.5);
+            background: rgba(255,255,255,0.9);
             color: var(--danger);
         }
 
         .room-body {
-            padding: 1.25rem;
+            padding: 1.5rem;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -315,48 +347,53 @@
 
         .room-title {
             font-family: 'Fraunces', serif;
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 0.85rem;
+            margin-bottom: 1rem;
             letter-spacing: -0.3px;
         }
 
         .room-meta {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.4rem 0.75rem;
-            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border);
         }
         .meta-item {
-            font-size: 0.8rem;
+            flex: 1 1 40%;
+            font-size: 0.85rem;
             color: var(--text-muted);
         }
         .meta-item strong {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
             font-size: 0.7rem;
-            font-weight: 500;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.08em;
             color: var(--text-muted);
-            opacity: 0.6;
-            margin-bottom: 0.1rem;
+            opacity: 0.7;
+            margin-bottom: 0.2rem;
         }
         .meta-item span {
             color: var(--text);
-            font-weight: 500;
-            font-size: 0.84rem;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
         .price-tag {
             font-family: 'Fraunces', serif;
-            font-size: 1.2rem;
+            font-size: 1.35rem;
             font-weight: 600;
             color: var(--accent);
-            margin-bottom: 0.9rem;
+            margin-bottom: 1rem;
         }
         .price-tag small {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
             font-size: 0.72rem;
             color: var(--text-muted);
             font-weight: 400;
@@ -366,83 +403,89 @@
         .facilities {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-bottom: 1.1rem;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
         }
         .facility-pill {
-            background: var(--surface-2);
+            background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 0.25rem 0.55rem;
-            font-size: 0.72rem;
+            border-radius: 30px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
             color: var(--text-muted);
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
-            transition: border-color 0.2s, color 0.2s;
+            gap: 0.4rem;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .facility-pill i { color: var(--accent); font-size: 0.68rem; }
+        .facility-pill i { color: var(--accent); font-size: 0.75rem; }
         .room-card:hover .facility-pill {
-            border-color: rgba(255,255,255,0.12);
-            color: var(--text);
+            border-color: var(--accent-dim);
+            background: var(--surface-2);
+            color: var(--accent);
         }
 
         /* Card actions */
         .room-actions {
             margin-top: auto;
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
         .btn-details {
             flex: 1;
-            background: var(--surface-2);
+            background: transparent;
             border: 1px solid var(--border);
             color: var(--text);
-            border-radius: var(--radius-sm);
-            font-size: 0.82rem;
-            font-weight: 500;
-            padding: 0.55rem 1rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.65rem 1rem;
             text-decoration: none;
             text-align: center;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .btn-details:hover {
             background: var(--surface-2);
-            border-color: rgba(255,255,255,0.2);
+            border-color: rgba(0,0,0,0.2);
             color: var(--text);
         }
         .btn-book {
             flex: 1;
             background: var(--accent);
             border: 1px solid var(--accent);
-            color: #0f0f13;
-            border-radius: var(--radius-sm);
-            font-size: 0.82rem;
+            color: #ffffff;
+            border-radius: 30px;
+            font-size: 0.85rem;
             font-weight: 600;
-            padding: 0.55rem 1rem;
+            padding: 0.65rem 1rem;
             text-decoration: none;
             text-align: center;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
         .btn-book:hover {
-            background: #d4f55a;
-            border-color: #d4f55a;
-            color: #0f0f13;
-            box-shadow: 0 0 18px var(--accent-glow);
+            background: #155bb5;
+            border-color: #155bb5;
+            color: #ffffff;
+            box-shadow: 0 6px 16px rgba(29,111,216,0.35);
+            transform: translateY(-2px);
         }
 
         /* Empty state */
         .empty-state {
             grid-column: 1 / -1;
             background: var(--surface);
-            border: 1px solid var(--border);
+            border: none;
             border-radius: var(--radius);
-            padding: 3.5rem;
+            padding: 5rem 3rem;
             text-align: center;
             color: var(--text-muted);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
         }
-        .empty-state i { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.4; }
-        .empty-state p { font-size: 0.95rem; }
+        .empty-state i { font-size: 3rem; margin-bottom: 1.5rem; opacity: 0.3; color: var(--accent); }
+        .empty-state p { font-size: 1.1rem; color: var(--text); }
 
         /* Divider */
         .section-divider {
@@ -489,6 +532,11 @@
 
     <!-- MAIN -->
     <div class="main-container">
+
+        <!-- BACK BUTTON -->
+        <a href="<%= request.getContextPath() %>/dashboard/student/index.jsp" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
 
         <!-- STATS -->
         <div class="stats-grid">
