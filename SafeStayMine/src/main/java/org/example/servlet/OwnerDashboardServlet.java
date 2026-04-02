@@ -41,7 +41,7 @@ public class OwnerDashboardServlet extends HttpServlet {
         Hostel hostel = ownerDAO.getHostelByOwnerId(user.getUserId());
 
         // Get statistics
-        Map<String, Object> stats = ownerDAO.getDashboardStats();
+        Map<String, Object> stats = ownerDAO.getDashboardStats(user.getUserId());
 
         // Set attributes
         request.setAttribute("owner", owner);

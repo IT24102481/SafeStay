@@ -28,22 +28,22 @@ public class DashboardServlet extends HttpServlet {
 
         // ========== REDIRECT BASED ON ROLE ==========
         if ("Student".equalsIgnoreCase(role)) {
-            response.sendRedirect("dashboard/student/index.jsp");
+            response.sendRedirect(request.getContextPath() + "/dashboard/student/index.jsp");
 
         } else if ("Kitchen_Staff".equalsIgnoreCase(role)) {
-            response.sendRedirect("dashboard/kitchen_staff/kitchen_dashboard.jsp");
+            response.sendRedirect(request.getContextPath() + "/dashboard/kitchen_staff/kitchen_dashboard.jsp");
 
         } else if ("Laundry_Staff".equalsIgnoreCase(role)) {
-            response.sendRedirect("laundry/staff/dashboard");
+            response.sendRedirect(request.getContextPath() + "/laundry/staff/dashboard");
 
         } else if ("Cleaning_Staff".equalsIgnoreCase(role)) {
-            response.sendRedirect("dashboard/cleaning_staff/dashboard.jsp");
+            response.sendRedirect(request.getContextPath() + "/dashboard/cleaning_staff/dashboard.jsp");
 
         } else if ("Owner".equalsIgnoreCase(role)) {
-            response.sendRedirect("dashboard/owner/index.jsp");
+            response.sendRedirect(request.getContextPath() + "/dashboard/owner");
 
         } else {
-            response.sendRedirect("index.jsp");
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
         }
     }
 }

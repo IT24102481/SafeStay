@@ -57,12 +57,40 @@
         .page-body { padding: 2rem; flex: 1; }
 
         /* ── PAGE HEADING ── */
+        .page-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.75rem;
+        }
         .page-heading {
             font-family: 'Fraunces', serif;
             font-size: 1.6rem;
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 1.75rem;
+            margin-bottom: 0;
+        }
+        .btn-back-owner {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            font-size: 0.86rem;
+            font-weight: 600;
+            padding: 0.55rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-back-owner:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
         }
 
         /* ── STATS GRID ── */
@@ -379,7 +407,12 @@
         .table-card-header span { font-size: 0.78rem; color: #6b6d78; }
 
         /* ── TABLE ── */
-        .rooms-table { width: 100%; border-collapse: collapse; }
+        .rooms-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            min-width: 980px;
+        }
         .rooms-table thead tr { background: var(--surface-2); border-bottom: 1px solid var(--border); }
         .rooms-table thead th {
             padding: 0.8rem 0.9rem;
@@ -390,7 +423,32 @@
         .rooms-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
         .rooms-table tbody tr:last-child { border-bottom: none; }
         .rooms-table tbody tr:hover { background: rgba(29,111,216,0.025); }
-        .rooms-table tbody td { padding: 0.8rem 0.9rem; font-size: 0.86rem; color: var(--text); vertical-align: middle; border: none; }
+        .rooms-table tbody td {
+            padding: 0.8rem 0.9rem;
+            font-size: 0.86rem;
+            color: var(--text);
+            vertical-align: middle;
+            border: none;
+            line-height: 1.25;
+        }
+
+        .rooms-table th:nth-child(1), .rooms-table td:nth-child(1) { width: 72px; }
+        .rooms-table th:nth-child(2), .rooms-table td:nth-child(2) { width: 90px; }
+        .rooms-table th:nth-child(3), .rooms-table td:nth-child(3) { width: 72px; }
+        .rooms-table th:nth-child(4), .rooms-table td:nth-child(4) { width: 120px; }
+        .rooms-table th:nth-child(5), .rooms-table td:nth-child(5) { width: 160px; }
+        .rooms-table th:nth-child(6), .rooms-table td:nth-child(6) { width: 130px; }
+        .rooms-table th:nth-child(7), .rooms-table td:nth-child(7) { width: 150px; }
+        .rooms-table th:nth-child(8), .rooms-table td:nth-child(8) { width: 115px; }
+        .rooms-table th:nth-child(9), .rooms-table td:nth-child(9) { width: 95px; }
+
+        .rooms-table td:nth-child(4),
+        .rooms-table td:nth-child(6),
+        .rooms-table td:nth-child(7) {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         .room-thumb {
             width: 46px; height: 46px;
@@ -401,7 +459,7 @@
         .room-num-cell { font-family: 'Fraunces', serif; font-weight: 600; color: var(--accent); font-size: 0.9rem; }
 
         /* Cap/Occ/Avail badges */
-        .occ-group { display: flex; align-items: center; gap: 0.3rem; }
+        .occ-group { display: flex; align-items: center; gap: 0.3rem; flex-wrap: nowrap; }
         .occ-pill {
             font-size: 0.68rem; font-weight: 700;
             padding: 0.2rem 0.5rem; border-radius: 12px;
@@ -424,7 +482,7 @@
         .badge.bg-secondary { background: rgba(107,107,128,0.1) !important; color: var(--text-muted) !important; border: 1px solid rgba(107,107,128,0.2); }
 
         /* Facility icons */
-        .facility-icons { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+        .facility-icons { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; min-height: 18px; }
         .fac-icon { font-size: 0.8rem; }
         .fac-icon.wifi    { color: var(--success); }
         .fac-icon.ac      { color: var(--accent); }
@@ -432,7 +490,7 @@
         .fac-icon.broom   { color: var(--warning); }
 
         /* Action buttons */
-        .action-btns { display: flex; gap: 0.4rem; }
+        .action-btns { display: flex; gap: 0.4rem; white-space: nowrap; }
         .btn-action {
             width: 30px; height: 30px;
             border-radius: 8px; font-size: 0.75rem;
@@ -475,7 +533,12 @@
     <div class="page-body">
 
         <!-- PAGE HEADING -->
-        <h1 class="page-heading"><a href="<%= request.getContextPath() %>/dashboard/owner/index.jsp" style="text-decoration:none;color:inherit;">Rooms Management</a></h1>
+        <div class="page-header-row">
+            <h1 class="page-heading">Rooms Management</h1>
+            <a href="<%= request.getContextPath() %>/dashboard/owner" class="btn-back-owner">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
 
         <!-- STATS -->
         <div class="stats-grid">
@@ -752,7 +815,20 @@
                     </thead>
                     <tbody>
                         <% if (rooms != null && !rooms.isEmpty()) {
-                            for (Room room : rooms) { %>
+                            for (Room room : rooms) {
+                                int calculatedAvailable = Math.max(0, room.getCapacity() - room.getOccupied());
+                                String roomStatus = room.getStatus() != null ? room.getStatus() : "Unknown";
+                                String statusBadgeClass;
+                                if ("Available".equalsIgnoreCase(roomStatus)) {
+                                    statusBadgeClass = "success";
+                                } else if ("Partially Occupied".equalsIgnoreCase(roomStatus)) {
+                                    statusBadgeClass = "warning";
+                                } else if ("Full".equalsIgnoreCase(roomStatus)) {
+                                    statusBadgeClass = "danger";
+                                } else {
+                                    statusBadgeClass = "secondary";
+                                }
+                        %>
                         <tr>
                             <td>
                                 <img src="<%= request.getContextPath() %>/<%= room.getFirstImage() %>"
@@ -769,13 +845,13 @@
                                     <span class="occ-sep">/</span>
                                     <span class="occ-pill occ"><%= room.getOccupied() %></span>
                                     <span class="occ-sep">/</span>
-                                    <span class="occ-pill avail"><%= room.getAvailableSlots() %></span>
+                                    <span class="occ-pill avail"><%= calculatedAvailable %></span>
                                 </div>
                             </td>
                             <td style="font-weight:600;"><%= room.getFormattedPrice() %></td>
                             <td>
-                                <span class="badge bg-<%= room.isAvailable() ? "success" : "danger" %>">
-                                    <%= room.getStatus() %>
+                                <span class="badge bg-<%= statusBadgeClass %>">
+                                    <%= roomStatus %>
                                 </span>
                             </td>
                             <td>

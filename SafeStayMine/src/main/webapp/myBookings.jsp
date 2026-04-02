@@ -8,6 +8,25 @@
         return;
     }
     List<BookingRequest> bookings = (List<BookingRequest>) request.getAttribute("bookings");
+
+    String contextPath = request.getContextPath();
+    String requestPath = request.getRequestURI();
+    if (requestPath.startsWith(contextPath)) {
+        requestPath = requestPath.substring(contextPath.length());
+    }
+
+    boolean navRoomsActive = requestPath.equals("/rooms") || requestPath.startsWith("/rooms/");
+    boolean navInquiriesActive = requestPath.startsWith("/inquiry");
+    boolean navBookingsActive = requestPath.startsWith("/booking/my-bookings");
+    boolean navSearchActive = requestPath.startsWith("/rooms/search");
+    boolean navDashboardActive = requestPath.startsWith("/dashboard/student");
+
+    String sidebarName = user.getFullName() != null ? user.getFullName().trim() : "Student";
+    if (sidebarName.isEmpty()) {
+        sidebarName = "Student";
+    }
+    String sidebarInitial = String.valueOf(Character.toUpperCase(sidebarName.charAt(0)));
+    String sidebarUserId = user.getUserId() != null ? user.getUserId() : "N/A";
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,62 +69,127 @@
                 radial-gradient(ellipse 40% 30% at -5% 80%, rgba(29,111,216,0.04) 0%, transparent 50%);
         }
 
-        /* ── NAVBAR ── */
-        .navbar {
-            background: rgba(244,245,247,0.90) !important;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 0.85rem 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .navbar-brand {
-            font-family: 'Fraunces', serif;
-            font-size: 1.35rem;
-            font-weight: 600;
-            color: var(--accent) !important;
-            letter-spacing: -0.5px;
-            text-decoration: none;
-        }
-        .navbar-brand span { color: var(--text); }
-        .btn-nav {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            border-radius: 8px;
-            font-size: 0.82rem;
-            padding: 0.35rem 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-        .btn-nav:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-        .btn-logout {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            border-radius: 8px;
-            font-size: 0.82rem;
-            padding: 0.35rem 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-        .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
-
         /* ── MAIN ── */
         .main-container {
-            max-width: 1200px;
+            max-width: 1420px;
             margin: 0 auto;
             padding: 2.5rem 1.5rem;
+        }
+        .page-layout {
+            position: relative;
+            padding-left: calc(320px + 1.25rem);
+        }
+        .rooms-sidebar {
+            background: linear-gradient(180deg, #1a237e 0%, #0d47a1 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 0 20px 20px 0;
+            padding: 1.2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            box-shadow: 0 16px 30px rgba(9, 21, 46, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .sidebar-brand {
+            text-align: center;
+            font-size: 2.55rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            margin-top: 0.1rem;
+            margin-bottom: 1.1rem;
+        }
+        .sidebar-brand span {
+            color: #ffd700;
+        }
+        .sidebar-divider {
+            border: 0;
+            border-top: 1px solid rgba(255,255,255,0.14);
+            margin: 0.35rem 0 1rem;
+        }
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.95rem;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.12);
+            margin-bottom: 1.15rem;
+        }
+        .profile-avatar {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            background: #ffd700;
+            color: #122166;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .profile-name {
+            color: #ffffff;
+            font-size: 1.06rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .profile-id {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.83rem;
+            margin-top: 0.2rem;
+        }
+        .side-nav-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.42rem;
+            margin-bottom: 1rem;
+        }
+        .side-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            color: rgba(255,255,255,0.93);
+            text-decoration: none;
+            font-size: 1.02rem;
+            font-weight: 600;
+            padding: 0.8rem 0.95rem;
+            border-radius: 14px;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .side-nav-link i {
+            width: 22px;
+            text-align: center;
+            color: inherit;
+            font-size: 1rem;
+        }
+        .side-nav-link:hover {
+            color: #ffffff;
+            background: rgba(255,255,255,0.12);
+            transform: none;
+        }
+        .side-nav-link.active {
+            color: #ffd700;
+            background: rgba(255,255,255,0.14);
+        }
+        .side-nav-foot {
+            margin-top: auto;
+            padding-top: 0.9rem;
+            border-top: 1px solid rgba(255,255,255,0.14);
+        }
+        .side-nav-foot .side-nav-link {
+            margin-top: 0.4rem;
+        }
+        .bookings-main {
+            min-width: 0;
         }
 
         /* ── PAGE HEADER ── */
@@ -418,6 +502,25 @@
             }
         }
 
+        @media (max-width: 1080px) {
+            .page-layout {
+                padding-left: 0;
+            }
+            .rooms-sidebar {
+                position: static;
+                top: auto;
+                left: auto;
+                width: auto;
+                height: auto;
+                overflow: visible;
+                margin-bottom: 1rem;
+                border-radius: 16px;
+            }
+            .side-nav-foot {
+                margin-top: 0.4rem;
+            }
+        }
+
         /* ── ANIMATIONS ── */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(14px); }
@@ -431,27 +534,44 @@
     </style>
 </head>
 <body>
-
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="<%= request.getContextPath() %>/dashboard/student/index.jsp">Safe<span>Stay</span></a>
-            <div class="d-flex align-items-center gap-2 ms-auto">
-                <a href="<%= request.getContextPath() %>/rooms" class="btn-nav">
-                    <i class="fas fa-door-open"></i> Browse Rooms
-                </a>
-                <a href="<%= request.getContextPath() %>/inquiry" class="btn-nav">
-                    <i class="fas fa-comments"></i> Inquiries
-                </a>
-                <a class="btn-logout" href="<%= request.getContextPath() %>/logout">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </div>
-        </div>
-    </nav>
-
     <!-- MAIN -->
     <div class="main-container">
+        <div class="page-layout">
+            <aside class="rooms-sidebar">
+                <div class="sidebar-brand">Safe<span>Stay</span></div>
+                <hr class="sidebar-divider">
+                <div class="sidebar-profile">
+                    <div class="profile-avatar"><%= sidebarInitial %></div>
+                    <div>
+                        <div class="profile-name"><%= sidebarName %></div>
+                        <div class="profile-id">ID: <%= sidebarUserId %></div>
+                    </div>
+                </div>
+                <nav class="side-nav-list" aria-label="Student page navigation">
+                    <a href="<%= contextPath %>/rooms" class="side-nav-link <%= navRoomsActive ? "active" : "" %>">
+                        <i class="fas fa-bed"></i> Browse Rooms
+                    </a>
+                    <a href="<%= contextPath %>/inquiry" class="side-nav-link <%= navInquiriesActive ? "active" : "" %>">
+                        <i class="fas fa-comments"></i> My Inquiries
+                    </a>
+                    <a href="<%= contextPath %>/booking/my-bookings" class="side-nav-link <%= navBookingsActive ? "active" : "" %>">
+                        <i class="fas fa-calendar-check"></i> My Bookings
+                    </a>
+                    <a href="<%= contextPath %>/rooms/search" class="side-nav-link <%= navSearchActive ? "active" : "" %>">
+                        <i class="fas fa-sliders-h"></i> Advanced Search
+                    </a>
+                </nav>
+                <div class="side-nav-foot">
+                    <a href="<%= contextPath %>/dashboard/student/index.jsp" class="side-nav-link <%= navDashboardActive ? "active" : "" %>">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <a href="<%= contextPath %>/logout" class="side-nav-link">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </aside>
+
+            <div class="bookings-main">
 
         <!-- PAGE HEADER -->
         <div class="page-header">
@@ -700,6 +820,8 @@
         </div>
 
         <% } %>
+            </div><!-- /.bookings-main -->
+        </div><!-- /.page-layout -->
     </div><!-- /.main-container -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

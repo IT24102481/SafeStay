@@ -482,7 +482,7 @@
 <div class="page-body">
 
     <!-- PAGE HEADING -->
-    <h1 class="page-heading"><a href="<%= request.getContextPath() %>/dashboard/owner/index.jsp" style="text-decoration:none;color:inherit;">Inquiries Management</a></h1>
+    <h1 class="page-heading"><a href="<%= request.getContextPath() %>/dashboard/owner" style="text-decoration:none;color:inherit;">Inquiries Management</a></h1>
 
     <!-- STATS -->
     <div class="stats-grid">

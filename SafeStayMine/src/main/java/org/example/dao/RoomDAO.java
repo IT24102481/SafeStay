@@ -20,8 +20,8 @@ public class RoomDAO {
     public List<Room> getAllRooms() {
         List<Room> rooms = new ArrayList<>();
         String sql = "SELECT r.*, h.hostel_name, h.address as hostel_address, h.city " +
-                "FROM room r " +
-                "JOIN hostel h ON r.hostel_id = h.id " +
+            "FROM dbo.room r " +
+            "JOIN dbo.hostel h ON r.hostel_id = h.id " +
                 "ORDER BY r.floor_number, r.room_number";
 
         try (Connection con = getConnection();
@@ -43,8 +43,8 @@ public class RoomDAO {
     public List<Room> getAvailableRooms() {
         List<Room> rooms = new ArrayList<>();
         String sql = "SELECT r.*, h.hostel_name, h.address as hostel_address, h.city " +
-                "FROM room r " +
-                "JOIN hostel h ON r.hostel_id = h.id " +
+            "FROM dbo.room r " +
+            "JOIN dbo.hostel h ON r.hostel_id = h.id " +
                 "WHERE r.status IN ('Available', 'Partially Occupied') " +
                 "AND r.available_slots > 0 " +
                 "ORDER BY r.floor_number, r.room_number";
@@ -68,8 +68,8 @@ public class RoomDAO {
     public Room getRoomById(int roomId) {
         Room room = null;
         String sql = "SELECT r.*, h.hostel_name, h.address as hostel_address, h.city " +
-                "FROM room r " +
-                "JOIN hostel h ON r.hostel_id = h.id " +
+            "FROM dbo.room r " +
+            "JOIN dbo.hostel h ON r.hostel_id = h.id " +
                 "WHERE r.id = ?";
 
         try (Connection con = getConnection();
@@ -91,7 +91,7 @@ public class RoomDAO {
     // 4. ADD NEW ROOM
     // ============================================
     public boolean addRoom(Room room) {
-        String sql = "INSERT INTO room " +
+        String sql = "INSERT INTO dbo.room " +
                 "(hostel_id, room_number, floor_number, room_type, capacity, occupied, " +
                 "price_monthly, status, bed_type, bathroom_type, " +
                 "has_wifi, has_study_table, has_cupboard, has_fan, has_ac, " +
@@ -134,7 +134,7 @@ public class RoomDAO {
     // 5. CHECK IF ROOM NUMBER EXISTS
     // ============================================
     public boolean roomNumberExists(String roomNumber) {
-        String sql = "SELECT COUNT(*) as count FROM room WHERE room_number = ?";
+        String sql = "SELECT COUNT(*) as count FROM dbo.room WHERE room_number = ?";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -160,8 +160,8 @@ public class RoomDAO {
         List<Room> rooms = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
                 "SELECT r.*, h.hostel_name, h.address as hostel_address, h.city " +
-                        "FROM room r " +
-                        "JOIN hostel h ON r.hostel_id = h.id " +
+                "FROM dbo.room r " +
+                "JOIN dbo.hostel h ON r.hostel_id = h.id " +
                         "WHERE r.status IN ('Available', 'Partially Occupied') " +
                         "AND r.available_slots > 0"
         );
@@ -232,7 +232,7 @@ public class RoomDAO {
     // 7. UPDATE ROOM OCCUPANCY
     // ============================================
     public boolean updateRoomOccupancy(int roomId, int newOccupied) {
-        String sql = "UPDATE room SET occupied = ?, updated_at = GETDATE() WHERE id = ?";
+        String sql = "UPDATE dbo.room SET occupied = ?, updated_at = GETDATE() WHERE id = ?";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -253,7 +253,7 @@ public class RoomDAO {
     // 8. UPDATE ROOM DETAILS (ADMIN)
     // ============================================
     public boolean updateRoom(Room room) {
-        String sql = "UPDATE room SET " +
+        String sql = "UPDATE dbo.room SET " +
                 "room_number = ?, " +
                 "floor_number = ?, " +
                 "room_type = ?, " +
@@ -312,7 +312,7 @@ public class RoomDAO {
     // ============================================
     public boolean deleteRoom(int roomId) {
         // Check if room has any bookings
-        String checkSql = "SELECT COUNT(*) as count FROM booking_request WHERE room_id = ?";
+        String checkSql = "SELECT COUNT(*) as count FROM dbo.booking_request WHERE room_id = ?";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(checkSql)) {
@@ -326,7 +326,7 @@ public class RoomDAO {
             }
 
             // Safe to delete
-            String deleteSql = "DELETE FROM room WHERE id = ?";
+            String deleteSql = "DELETE FROM dbo.room WHERE id = ?";
             try (PreparedStatement deletePst = con.prepareStatement(deleteSql)) {
                 deletePst.setInt(1, roomId);
                 int result = deletePst.executeUpdate();
@@ -345,8 +345,8 @@ public class RoomDAO {
     public List<Room> getRoomsByFloor(int floorNumber) {
         List<Room> rooms = new ArrayList<>();
         String sql = "SELECT r.*, h.hostel_name, h.address as hostel_address, h.city " +
-                "FROM room r " +
-                "JOIN hostel h ON r.hostel_id = h.id " +
+                "FROM dbo.room r " +
+                "JOIN dbo.hostel h ON r.hostel_id = h.id " +
                 "WHERE r.floor_number = ? " +
                 "ORDER BY r.room_number";
 
@@ -369,7 +369,7 @@ public class RoomDAO {
     // 11. GET DEFAULT HOSTEL ID
     // ============================================
     public int getDefaultHostelId() {
-        String sql = "SELECT TOP 1 id FROM hostel ORDER BY id";
+        String sql = "SELECT TOP 1 id FROM dbo.hostel ORDER BY id";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql);
@@ -396,7 +396,7 @@ public class RoomDAO {
                 "SUM(available_slots) as total_available, " +
                 "SUM(CASE WHEN status = 'Available' THEN 1 ELSE 0 END) as fully_available, " +
                 "SUM(CASE WHEN status = 'Full' THEN 1 ELSE 0 END) as full_rooms " +
-                "FROM room";
+            "FROM dbo.room";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql);
@@ -420,7 +420,7 @@ public class RoomDAO {
     // 13. CHECK ROOM AVAILABILITY
     // ============================================
     public boolean isRoomAvailable(int roomId) {
-        String sql = "SELECT available_slots FROM room WHERE id = ? " +
+        String sql = "SELECT available_slots FROM dbo.room WHERE id = ? " +
                 "AND status IN ('Available', 'Partially Occupied')";
 
         try (Connection con = getConnection();
@@ -443,7 +443,7 @@ public class RoomDAO {
     // ============================================
     public Map<String, BigDecimal> getPriceRange() {
         Map<String, BigDecimal> range = new HashMap<>();
-        String sql = "SELECT MIN(price_monthly) as min_price, MAX(price_monthly) as max_price FROM room";
+        String sql = "SELECT MIN(price_monthly) as min_price, MAX(price_monthly) as max_price FROM dbo.room";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql);

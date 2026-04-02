@@ -9,6 +9,36 @@
     }
     List<Inquiry> inquiries = (List<Inquiry>) request.getAttribute("inquiries");
     List<Room> rooms = (List<Room>) request.getAttribute("rooms");
+
+    int preselectedRoomId = 0;
+    String roomIdParam = request.getParameter("roomId");
+    if (roomIdParam != null) {
+        try {
+            preselectedRoomId = Integer.parseInt(roomIdParam);
+            if (preselectedRoomId < 0) preselectedRoomId = 0;
+        } catch (NumberFormatException ignore) {
+            preselectedRoomId = 0;
+        }
+    }
+
+    String contextPath = request.getContextPath();
+    String requestPath = request.getRequestURI();
+    if (requestPath.startsWith(contextPath)) {
+        requestPath = requestPath.substring(contextPath.length());
+    }
+
+    boolean navRoomsActive = requestPath.equals("/rooms") || requestPath.startsWith("/rooms/");
+    boolean navInquiriesActive = requestPath.startsWith("/inquiry");
+    boolean navBookingsActive = requestPath.startsWith("/booking/my-bookings");
+    boolean navSearchActive = requestPath.startsWith("/rooms/search");
+    boolean navDashboardActive = requestPath.startsWith("/dashboard/student");
+
+    String sidebarName = user.getFullName() != null ? user.getFullName().trim() : "Student";
+    if (sidebarName.isEmpty()) {
+        sidebarName = "Student";
+    }
+    String sidebarInitial = String.valueOf(Character.toUpperCase(sidebarName.charAt(0)));
+    String sidebarUserId = user.getUserId() != null ? user.getUserId() : "N/A";
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,108 +81,150 @@
                 radial-gradient(ellipse 40% 30% at -5% 80%, rgba(29,111,216,0.04) 0%, transparent 50%);
         }
 
-        /* ── NAVBAR ── */
-        .navbar {
-            background: rgba(244,245,247,0.90) !important;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 0.85rem 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .navbar-brand {
-            font-family: 'Fraunces', serif;
-            font-size: 1.35rem;
-            font-weight: 600;
-            color: var(--accent) !important;
-            letter-spacing: -0.5px;
-            text-decoration: none;
-        }
-        .navbar-brand span { color: var(--text); }
-        .btn-nav {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            border-radius: 8px;
-            font-size: 0.82rem;
-            padding: 0.35rem 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-        .btn-nav:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-        .btn-logout {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            border-radius: 8px;
-            font-size: 0.82rem;
-            padding: 0.35rem 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-        .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
-
         /* ── MAIN ── */
         .main-container {
-            max-width: 1200px;
+            max-width: 1420px;
             margin: 0 auto;
             padding: 2.5rem 1.5rem;
         }
 
-        /* ── LAYOUT ── */
-        .inquiry-layout {
-            display: grid;
-            grid-template-columns: 340px 1fr;
-            gap: 1.75rem;
-            align-items: start;
+        .page-layout {
+            position: relative;
+            padding-left: calc(320px + 1.25rem);
         }
-        @media (max-width: 900px) {
-            .inquiry-layout { grid-template-columns: 1fr; }
+        .rooms-sidebar {
+            background: linear-gradient(180deg, #1a237e 0%, #0d47a1 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 0 20px 20px 0;
+            padding: 1.2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            box-shadow: 0 16px 30px rgba(9, 21, 46, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
         }
-
-        /* ── FORM PANEL ── */
-        .form-panel {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
-            position: sticky;
-            top: 90px;
-            animation: fadeUp 0.4s ease both;
+        .sidebar-brand {
+            text-align: center;
+            font-size: 2.55rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            margin-top: 0.1rem;
+            margin-bottom: 1.1rem;
         }
-        @media (max-width: 900px) {
-            .form-panel { position: static; }
+        .sidebar-brand span {
+            color: #ffd700;
         }
-
-        .form-panel-header {
-            background: var(--accent-dim);
-            border-bottom: 1px solid rgba(90,158,15,0.15);
-            padding: 1.1rem 1.4rem;
+        .sidebar-divider {
+            border: 0;
+            border-top: 1px solid rgba(255,255,255,0.14);
+            margin: 0.35rem 0 1rem;
+        }
+        .sidebar-profile {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.9rem;
+            padding: 0.95rem;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.12);
+            margin-bottom: 1.15rem;
         }
-        .form-panel-header h5 {
-            font-family: 'Fraunces', serif;
-            font-size: 1rem;
+        .profile-avatar {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            background: #ffd700;
+            color: #122166;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .profile-name {
+            color: #ffffff;
+            font-size: 1.06rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .profile-id {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.83rem;
+            margin-top: 0.2rem;
+        }
+        .side-nav-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.42rem;
+            margin-bottom: 1rem;
+        }
+        .side-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            color: rgba(255,255,255,0.93);
+            text-decoration: none;
+            font-size: 1.02rem;
             font-weight: 600;
-            color: var(--accent);
-            margin: 0;
+            padding: 0.8rem 0.95rem;
+            border-radius: 14px;
+            border: none;
+            transition: all 0.2s ease;
         }
-        .form-panel-header i { color: var(--accent); font-size: 0.9rem; }
+        .side-nav-link i {
+            width: 22px;
+            text-align: center;
+            color: inherit;
+            font-size: 1rem;
+        }
+        .side-nav-link:hover {
+            color: #ffffff;
+            background: rgba(255,255,255,0.12);
+            transform: none;
+        }
+        .side-nav-link.active {
+            color: #ffd700;
+            background: rgba(255,255,255,0.14);
+        }
+        .side-nav-foot {
+            margin-top: auto;
+            padding-top: 0.9rem;
+            border-top: 1px solid rgba(255,255,255,0.14);
+        }
+        .side-nav-foot .side-nav-link {
+            margin-top: 0.4rem;
+        }
 
-        .form-panel-body { padding: 1.4rem; }
+        /* ── LAYOUT ── */
+        .inquiry-layout {
+            display: block;
+        }
+
+        @media (max-width: 1080px) {
+            .page-layout {
+                padding-left: 0;
+            }
+            .rooms-sidebar {
+                position: static;
+                top: auto;
+                left: auto;
+                width: auto;
+                height: auto;
+                overflow: visible;
+                margin-bottom: 1rem;
+                border-radius: 16px;
+            }
+            .side-nav-foot {
+                margin-top: 0.4rem;
+            }
+        }
 
         /* Form controls */
         .form-label {
@@ -239,6 +311,60 @@
             border-radius: 20px;
             padding: 0.25rem 0.75rem;
             font-weight: 500;
+        }
+        .right-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .btn-create-inquiry {
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: #fff;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.46rem 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+        .btn-create-inquiry:hover {
+            background: #155bb5;
+            border-color: #155bb5;
+            color: #fff;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+
+        /* ── CREATE MODAL ── */
+        .create-inquiry-modal .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 24px 64px rgba(0,0,0,0.14);
+            overflow: hidden;
+        }
+        .create-inquiry-modal .modal-header {
+            background: var(--accent-dim);
+            border-bottom: 1px solid rgba(29,111,216,0.22);
+            padding: 1rem 1.15rem;
+        }
+        .create-inquiry-modal .modal-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .create-inquiry-modal .modal-body {
+            padding: 1.15rem;
+            background: var(--surface);
         }
 
         /* ── ALERTS ── */
@@ -460,91 +586,57 @@
     </style>
 </head>
 <body>
-
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="<%= request.getContextPath() %>/dashboard/student/index.jsp">Safe<span>Stay</span></a>
-            <div class="d-flex align-items-center gap-2 ms-auto">
-                <a href="<%= request.getContextPath() %>/rooms" class="btn-nav">
-                    <i class="fas fa-door-open"></i> Browse Rooms
-                </a>
-                <a href="<%= request.getContextPath() %>/booking/my-bookings" class="btn-nav">
-                    <i class="fas fa-calendar-check"></i> My Bookings
-                </a>
-                <a class="btn-logout" href="<%= request.getContextPath() %>/logout">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </div>
-        </div>
-    </nav>
-
     <!-- MAIN -->
     <div class="main-container">
-        <div class="inquiry-layout">
-
-            <!-- LEFT: NEW INQUIRY FORM -->
-            <div class="form-panel">
-                <div class="form-panel-header">
-                    <i class="fas fa-plus-circle"></i>
-                    <h5>Create New Inquiry</h5>
+        <div class="page-layout">
+            <aside class="rooms-sidebar">
+                <div class="sidebar-brand">Safe<span>Stay</span></div>
+                <hr class="sidebar-divider">
+                <div class="sidebar-profile">
+                    <div class="profile-avatar"><%= sidebarInitial %></div>
+                    <div>
+                        <div class="profile-name"><%= sidebarName %></div>
+                        <div class="profile-id">ID: <%= sidebarUserId %></div>
+                    </div>
                 </div>
-                <div class="form-panel-body">
-                    <form action="<%= request.getContextPath() %>/inquiry" method="post">
-
-                        <div class="field-group">
-                            <label class="form-label">Inquiry Type *</label>
-                            <select name="inquiryType" class="form-select" required>
-                                <option value="">Select Type</option>
-                                <option value="Room Details">Room Details</option>
-                                <option value="Location">Location Information</option>
-                                <option value="Photos">Additional Photos</option>
-                                <option value="Facilities">Facilities Query</option>
-                                <option value="General">General Query</option>
-                            </select>
-                        </div>
-
-                        <div class="field-group">
-                            <label class="form-label">Room <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.75rem;opacity:0.7;">(Optional)</span></label>
-                            <select name="roomId" class="form-select">
-                                <option value="0">General Inquiry</option>
-                                <% if (rooms != null) {
-                                    for (Room room : rooms) { %>
-                                    <option value="<%= room.getId() %>">
-                                        Room <%= room.getRoomNumber() %> — Floor <%= room.getFloorNumber() %>
-                                    </option>
-                                <% }
-                                } %>
-                            </select>
-                        </div>
-
-                        <div class="field-group">
-                            <label class="form-label">Subject *</label>
-                            <input type="text" name="subject" class="form-control"
-                                   placeholder="Brief subject" required>
-                        </div>
-
-                        <div class="field-group">
-                            <label class="form-label">Message *</label>
-                            <textarea name="message" class="form-control" rows="4"
-                                      placeholder="Your inquiry message..." required></textarea>
-                        </div>
-
-                        <button type="submit" class="btn-submit">
-                            <i class="fas fa-paper-plane"></i> Submit Inquiry
-                        </button>
-                    </form>
+                <nav class="side-nav-list" aria-label="Student page navigation">
+                    <a href="<%= contextPath %>/rooms" class="side-nav-link <%= navRoomsActive ? "active" : "" %>">
+                        <i class="fas fa-bed"></i> Browse Rooms
+                    </a>
+                    <a href="<%= contextPath %>/inquiry" class="side-nav-link <%= navInquiriesActive ? "active" : "" %>">
+                        <i class="fas fa-comments"></i> My Inquiries
+                    </a>
+                    <a href="<%= contextPath %>/booking/my-bookings" class="side-nav-link <%= navBookingsActive ? "active" : "" %>">
+                        <i class="fas fa-calendar-check"></i> My Bookings
+                    </a>
+                    <a href="<%= contextPath %>/rooms/search" class="side-nav-link <%= navSearchActive ? "active" : "" %>">
+                        <i class="fas fa-sliders-h"></i> Advanced Search
+                    </a>
+                </nav>
+                <div class="side-nav-foot">
+                    <a href="<%= contextPath %>/dashboard/student/index.jsp" class="side-nav-link <%= navDashboardActive ? "active" : "" %>">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <a href="<%= contextPath %>/logout" class="side-nav-link">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
                 </div>
-            </div>
+            </aside>
 
+            <div class="inquiry-layout">
             <!-- RIGHT: INQUIRIES LIST -->
             <div class="right-col">
 
                 <div class="right-header">
                     <div class="page-title">My Inquiries</div>
-                    <% if (inquiries != null && !inquiries.isEmpty()) { %>
-                    <span class="inquiry-count"><%= inquiries.size() %> total</span>
-                    <% } %>
+                    <div class="right-header-actions">
+                        <% if (inquiries != null && !inquiries.isEmpty()) { %>
+                        <span class="inquiry-count"><%= inquiries.size() %> total</span>
+                        <% } %>
+                        <button type="button" class="btn-create-inquiry" data-bs-toggle="modal" data-bs-target="#createInquiryModal">
+                            <i class="fas fa-plus"></i> Create New Inquiry
+                        </button>
+                    </div>
                 </div>
 
                 <!-- SUCCESS ALERT -->
@@ -640,9 +732,89 @@
 
                 <% } %>
             </div><!-- /.right-col -->
-        </div><!-- /.inquiry-layout -->
+            </div><!-- /.inquiry-layout -->
+
+            <div class="modal fade create-inquiry-modal" id="createInquiryModal" tabindex="-1" aria-labelledby="createInquiryModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createInquiryModalLabel">
+                                <i class="fas fa-plus-circle"></i> Create New Inquiry
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="<%= request.getContextPath() %>/inquiry" method="post">
+                                <div class="field-group">
+                                    <label class="form-label">Inquiry Type *</label>
+                                    <select name="inquiryType" class="form-select" required>
+                                        <option value="">Select Type</option>
+                                        <option value="Room Details">Room Details</option>
+                                        <option value="Location">Location Information</option>
+                                        <option value="Photos">Additional Photos</option>
+                                        <option value="Facilities">Facilities Query</option>
+                                        <option value="General">General Query</option>
+                                    </select>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="form-label">Room <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.75rem;opacity:0.7;">(Optional)</span></label>
+                                    <select id="inquiryRoomSelect" name="roomId" class="form-select">
+                                        <option value="0" <%= preselectedRoomId == 0 ? "selected" : "" %>>General Inquiry</option>
+                                        <% if (rooms != null) {
+                                            for (Room room : rooms) { %>
+                                            <option value="<%= room.getId() %>" <%= preselectedRoomId == room.getId() ? "selected" : "" %>>
+                                                Room <%= room.getRoomNumber() %> — Floor <%= room.getFloorNumber() %>
+                                            </option>
+                                        <% }
+                                        } %>
+                                    </select>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="form-label">Subject *</label>
+                                    <input type="text" name="subject" class="form-control"
+                                           placeholder="Brief subject" required>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="form-label">Message *</label>
+                                    <textarea name="message" class="form-control" rows="4"
+                                              placeholder="Your inquiry message..." required></textarea>
+                                </div>
+
+                                <button type="submit" class="btn-submit">
+                                    <i class="fas fa-paper-plane"></i> Submit Inquiry
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.page-layout -->
     </div><!-- /.main-container -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            var preselectedRoomId = <%= preselectedRoomId %>;
+            if (preselectedRoomId <= 0) {
+                return;
+            }
+
+            var modalEl = document.getElementById('createInquiryModal');
+            if (!modalEl) {
+                return;
+            }
+
+            var roomSelect = document.getElementById('inquiryRoomSelect');
+            if (roomSelect) {
+                roomSelect.value = String(preselectedRoomId);
+            }
+
+            var inquiryModal = new bootstrap.Modal(modalEl);
+            inquiryModal.show();
+        })();
+    </script>
 </body>
 </html>

@@ -92,69 +92,30 @@
             pointer-events: none;
         }
 
-        /* ── NAVBAR ── */
-        .navbar {
-            background: rgba(247,249,252,0.82) !important;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 0.85rem 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .navbar-brand {
-            font-family: 'Fraunces', serif;
-            font-size: 1.35rem;
-            font-weight: 600;
-            color: var(--accent) !important;
-            letter-spacing: -0.5px;
-        }
-        .navbar-brand span { color: var(--text); }
-        .nav-user-name {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            font-weight: 400;
-        }
-        .btn-logout {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            border-radius: 8px;
-            font-size: 0.82rem;
-            padding: 0.35rem 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .btn-logout:hover {
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
         /* ── MAIN CONTAINER ── */
         .main-container {
-            max-width: 1420px;
-            margin: 0 auto;
-            padding: 2.5rem 1.5rem;
+            max-width: none;
+            margin: 0;
+            padding: 0;
         }
         .rooms-layout {
-            display: grid;
-            grid-template-columns: 320px minmax(0, 1fr);
-            gap: 1.25rem;
-            align-items: start;
+            position: relative;
         }
         .rooms-sidebar {
             background: linear-gradient(180deg, #1a237e 0%, #0d47a1 100%);
             color: #ffffff;
             border: none;
-            border-radius: 20px;
+            border-radius: 0 20px 20px 0;
             padding: 1.2rem;
-            position: sticky;
-            top: 92px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
             box-shadow: 0 16px 30px rgba(9, 21, 46, 0.25);
             display: flex;
             flex-direction: column;
-            min-height: calc(100vh - 116px);
+            height: 100vh;
+            overflow-y: auto;
         }
         .sidebar-brand {
             text-align: center;
@@ -257,6 +218,7 @@
             border-radius: 20px;
             padding: 1.3rem;
             box-shadow: 0 16px 34px rgba(13, 28, 45, 0.08);
+            margin-left: 320px;
         }
 
         /* ── STATS CARDS ── */
@@ -410,9 +372,10 @@
         /* ── ROOM GRID ── */
         .rooms-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1.25rem;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
         }
+        @media (max-width: 1320px) { .rooms-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 920px)  { .rooms-grid { grid-template-columns: 1fr; } }
 
         /* ── ROOM CARD ── */
@@ -434,7 +397,7 @@
         .room-image-wrap {
             position: relative;
             overflow: hidden;
-            aspect-ratio: 4/3;
+            aspect-ratio: 16/10;
         }
         .room-image {
             width: 100%;
@@ -472,7 +435,7 @@
         }
 
         .room-body {
-            padding: 1.5rem;
+            padding: 1.1rem;
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -480,24 +443,24 @@
 
         .room-title {
             font-family: 'Fraunces', serif;
-            font-size: 1.25rem;
+            font-size: 1.08rem;
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             letter-spacing: -0.3px;
         }
 
         .room-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
-            padding-bottom: 1.25rem;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.95rem;
             border-bottom: 1px solid var(--border);
         }
         .meta-item {
             flex: 1 1 40%;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
         .meta-item strong {
@@ -515,15 +478,15 @@
         .meta-item span {
             color: var(--text);
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.84rem;
         }
 
         .price-tag {
             font-family: 'Fraunces', serif;
-            font-size: 1.35rem;
+            font-size: 1.15rem;
             font-weight: 600;
             color: var(--accent);
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
         .price-tag small {
             font-family: 'Sora', sans-serif;
@@ -537,7 +500,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
         .facility-pill {
             background: var(--surface);
@@ -564,7 +527,8 @@
         .room-actions {
             margin-top: auto;
             display: flex;
-            gap: 0.75rem;
+            gap: 0.55rem;
+            flex-wrap: wrap;
         }
         .btn-details {
             flex: 1;
@@ -572,9 +536,9 @@
             border: 1px solid var(--border);
             color: var(--text);
             border-radius: 30px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            padding: 0.65rem 1rem;
+            padding: 0.52rem 0.85rem;
             text-decoration: none;
             text-align: center;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -590,9 +554,9 @@
             border: 1px solid var(--accent);
             color: #ffffff;
             border-radius: 30px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            padding: 0.65rem 1rem;
+            padding: 0.52rem 0.85rem;
             text-decoration: none;
             text-align: center;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -604,6 +568,24 @@
             color: #ffffff;
             box-shadow: 0 6px 16px rgba(29,111,216,0.35);
             transform: translateY(-2px);
+        }
+        .btn-inquiry {
+            flex: 1 1 100%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.52rem 0.85rem;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-inquiry:hover {
+            background: var(--accent-dim);
+            border-color: rgba(29,111,216,0.28);
+            color: var(--accent);
         }
 
         /* Empty state */
@@ -633,13 +615,17 @@
             }
         }
         @media (max-width: 1080px) {
-            .rooms-layout {
-                grid-template-columns: 1fr;
-            }
             .rooms-sidebar {
                 position: static;
                 top: auto;
-                min-height: auto;
+                left: auto;
+                width: auto;
+                height: auto;
+                overflow: visible;
+                border-radius: 16px;
+            }
+            .rooms-main {
+                margin-left: 0;
             }
             .side-nav-foot {
                 margin-top: 0.4rem;
@@ -696,23 +682,6 @@
     </style>
 </head>
 <body>
-
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="<%= request.getContextPath() %>/dashboard/student/index.jsp">Safe<span>Stay</span></a>
-            <div class="d-flex align-items-center gap-3 ms-auto">
-                <span class="nav-user-name d-none d-sm-inline">
-                    <i class="fas fa-user-circle me-1" style="color: var(--accent); opacity:.7;"></i>
-                    Welcome, <%= user.getFullName() %>
-                </span>
-                <a class="btn-logout" href="logout">
-                    <i class="fas fa-sign-out-alt me-1"></i> Logout
-                </a>
-            </div>
-        </div>
-    </nav>
-
     <!-- MAIN -->
     <div class="main-container">
 
@@ -867,6 +836,11 @@
                         <% if ("Student".equalsIgnoreCase(user.getRole()) && room.isAvailable()) { %>
                             <a href="booking/request?roomId=<%= room.getId() %>" class="btn-book">
                                 <i class="fas fa-bolt me-1"></i> Book Now
+                            </a>
+                        <% } %>
+                        <% if ("Student".equalsIgnoreCase(user.getRole())) { %>
+                            <a href="<%= request.getContextPath() %>/inquiry?roomId=<%= room.getId() %>" class="btn-inquiry">
+                                <i class="fas fa-comments me-1"></i> Make Inquiry
                             </a>
                         <% } %>
                     </div>

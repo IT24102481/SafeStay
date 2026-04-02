@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="org.example.model.*, java.util.*, java.text.*" %>
+<%@ page import="org.example.model.*, org.example.dao.OwnerDAO, java.util.*, java.text.*" %>
 <%
     // ============ SESSION CHECK ============
     User user = (User) session.getAttribute("user");
@@ -17,6 +17,22 @@
     Owner owner = (Owner) request.getAttribute("owner");
     Hostel hostel = (Hostel) request.getAttribute("hostel");
     Map<String, Object> stats = (Map<String, Object>) request.getAttribute("stats");
+
+    // Load fresh data if this JSP is accessed directly (without servlet forward)
+    if (owner == null || hostel == null || stats == null) {
+        OwnerDAO ownerDAO = new OwnerDAO();
+        String ownerId = user.getUserId();
+
+        if (owner == null) {
+            owner = ownerDAO.getOwnerByUserId(ownerId);
+        }
+        if (hostel == null) {
+            hostel = ownerDAO.getHostelByOwnerId(ownerId);
+        }
+        if (stats == null) {
+            stats = ownerDAO.getDashboardStats(ownerId);
+        }
+    }
 
     // ============ NULL CHECKS ============
     if (owner == null) {
@@ -954,15 +970,15 @@
 
         <div class="hostel-stats">
             <div class="hostel-stat-item">
-                <div class="hostel-stat-value"><%= hostel.getTotalRooms() %></div>
+                <div class="hostel-stat-value"><%= stats.get("totalRooms") != null ? stats.get("totalRooms") : 0 %></div>
                 <div class="hostel-stat-label">Total Rooms</div>
             </div>
             <div class="hostel-stat-item">
-                <div class="hostel-stat-value"><%= hostel.getAvailableRooms() %></div>
+                <div class="hostel-stat-value"><%= stats.get("availableRooms") != null ? stats.get("availableRooms") : 0 %></div>
                 <div class="hostel-stat-label">Available</div>
             </div>
             <div class="hostel-stat-item">
-                <div class="hostel-stat-value"><%= hostel.getOccupiedRooms() %></div>
+                <div class="hostel-stat-value"><%= stats.get("occupiedRooms") != null ? stats.get("occupiedRooms") : 0 %></div>
                 <div class="hostel-stat-label">Occupied</div>
             </div>
         </div>
@@ -1117,15 +1133,15 @@
 
         <div class="room-status-grid">
             <div class="room-status-item">
-                <div class="room-status-value"><%= hostel.getTotalRooms() %></div>
+                <div class="room-status-value"><%= stats.get("totalRooms") != null ? stats.get("totalRooms") : 0 %></div>
                 <div class="room-status-label">Total Rooms</div>
             </div>
             <div class="room-status-item">
-                <div class="room-status-value" style="color: #10b981;"><%= hostel.getAvailableRooms() %></div>
+                <div class="room-status-value" style="color: #10b981;"><%= stats.get("availableRooms") != null ? stats.get("availableRooms") : 0 %></div>
                 <div class="room-status-label">Available</div>
             </div>
             <div class="room-status-item">
-                <div class="room-status-value" style="color: #4f46e5;"><%= hostel.getOccupiedRooms() %></div>
+                <div class="room-status-value" style="color: #4f46e5;"><%= stats.get("occupiedRooms") != null ? stats.get("occupiedRooms") : 0 %></div>
                 <div class="room-status-label">Occupied</div>
             </div>
         </div>

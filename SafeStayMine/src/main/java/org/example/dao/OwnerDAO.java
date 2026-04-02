@@ -19,7 +19,7 @@ public class OwnerDAO {
     // ============ GET OWNER BY USER ID ============
     public Owner getOwnerByUserId(String userId) {
         Owner owner = null;
-        String sql = "SELECT * FROM owner WHERE userId = ?";
+        String sql = "SELECT * FROM dbo.owner WHERE userId = ?";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -46,9 +46,19 @@ public class OwnerDAO {
     // ============ GET HOSTEL BY OWNER ID (FIXED - REMOVED EXTRA FIELDS) ============
     public Hostel getHostelByOwnerId(String ownerId) {
         Hostel hostel = null;
-        String sql = "SELECT id, ownerId, hostel_name, address, city, total_rooms, available_rooms, " +
-                "contact_number, email, warden_name, warden_phone, status, created_at " +
-                "FROM hostel WHERE ownerId = ?";
+        String sql = "SELECT h.id, h.ownerId, h.hostel_name, h.address, h.city, " +
+            "ISNULL(rstats.total_rooms, 0) AS total_rooms, " +
+            "ISNULL(rstats.available_rooms, 0) AS available_rooms, " +
+            "h.contact_number, h.email, h.warden_name, h.warden_phone, h.status, h.created_at " +
+            "FROM dbo.hostel h " +
+            "LEFT JOIN (" +
+            "    SELECT hostel_id, " +
+            "           COUNT(*) AS total_rooms, " +
+            "           SUM(CASE WHEN ISNULL(available_slots, 0) > 0 THEN 1 ELSE 0 END) AS available_rooms " +
+            "    FROM dbo.room " +
+            "    GROUP BY hostel_id" +
+            ") rstats ON rstats.hostel_id = h.id " +
+            "WHERE h.ownerId = ?";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -79,20 +89,30 @@ public class OwnerDAO {
     }
 
     // ============ GET DASHBOARD STATISTICS ============
-    public Map<String, Object> getDashboardStats() {
+        public Map<String, Object> getDashboardStats(String ownerId) {
         Map<String, Object> stats = new HashMap<>();
 
         String sql = "SELECT " +
-                "(SELECT COUNT(*) FROM users WHERE role = 'Student') as totalStudents, " +
-                "(SELECT COUNT(*) FROM staff_details) as totalStaff, " +
-                "(SELECT SUM(total_rooms) FROM hostel) as totalRooms, " +
-                "(SELECT SUM(available_rooms) FROM hostel) as availableRooms, " +
-                "(SELECT ISNULL(SUM(amount), 0) FROM payment WHERE MONTH(payment_date) = MONTH(GETDATE()) AND YEAR(payment_date) = YEAR(GETDATE())) as monthlyRevenue, " +
-                "(SELECT COUNT(*) FROM maintenance WHERE status = 'Pending') as pendingMaintenance";
+            "(SELECT COUNT(*) FROM dbo.users WHERE role = 'Student') as totalStudents, " +
+            "(SELECT COUNT(*) FROM dbo.staff_details) as totalStaff, " +
+            "(SELECT COUNT(*) " +
+            "   FROM dbo.room r " +
+            "   JOIN dbo.hostel h ON h.id = r.hostel_id " +
+            "  WHERE h.ownerId = ?) as totalRooms, " +
+            "(SELECT ISNULL(SUM(CASE WHEN ISNULL(r.available_slots, 0) > 0 THEN 1 ELSE 0 END), 0) " +
+            "   FROM dbo.room r " +
+            "   JOIN dbo.hostel h ON h.id = r.hostel_id " +
+            "  WHERE h.ownerId = ?) as availableRooms, " +
+            "(SELECT ISNULL(SUM(amount), 0) FROM dbo.payment WHERE MONTH(payment_date) = MONTH(GETDATE()) AND YEAR(payment_date) = YEAR(GETDATE())) as monthlyRevenue, " +
+            "(SELECT COUNT(*) FROM dbo.maintenance WHERE status = 'Pending') as pendingMaintenance";
 
         try (Connection con = getConnection();
-             PreparedStatement pst = con.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setString(1, ownerId);
+            pst.setString(2, ownerId);
+
+            ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
                 int totalRooms = rs.getInt("totalRooms");
@@ -134,7 +154,7 @@ public class OwnerDAO {
     // ============ GET ALL STUDENTS ============
     public List<Map<String, Object>> getAllStudents() {
         List<Map<String, Object>> students = new ArrayList<>();
-        String sql = "SELECT s.*, u.username FROM student_details s JOIN users u ON s.userId = u.userId ORDER BY s.registration_date DESC";
+        String sql = "SELECT s.*, u.username FROM dbo.student_details s JOIN dbo.users u ON s.userId = u.userId ORDER BY s.registration_date DESC";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql);
@@ -166,7 +186,7 @@ public class OwnerDAO {
     // ============ GET ALL STAFF ============
     public List<Map<String, Object>> getAllStaff() {
         List<Map<String, Object>> staffList = new ArrayList<>();
-        String sql = "SELECT s.*, u.username FROM staff_details s JOIN users u ON s.userId = u.userId ORDER BY s.registration_date DESC";
+        String sql = "SELECT s.*, u.username FROM dbo.staff_details s JOIN dbo.users u ON s.userId = u.userId ORDER BY s.registration_date DESC";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql);
@@ -193,7 +213,7 @@ public class OwnerDAO {
     // ============ GET RECENT PAYMENTS ============
     public List<Payment> getRecentPayments(int limit) {
         List<Payment> payments = new ArrayList<>();
-        String sql = "SELECT TOP (?) p.*, u.fullName as studentName FROM payment p JOIN users u ON p.studentId = u.userId ORDER BY p.created_at DESC";
+        String sql = "SELECT TOP (?) p.*, u.fullName as studentName FROM dbo.payment p JOIN dbo.users u ON p.studentId = u.userId ORDER BY p.created_at DESC";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -222,7 +242,7 @@ public class OwnerDAO {
 
     // ============ UPDATE HOSTEL ============
     public boolean updateHostel(Hostel hostel) {
-        String sql = "UPDATE hostel SET hostel_name=?, address=?, city=?, total_rooms=?, available_rooms=?, " +
+        String sql = "UPDATE dbo.hostel SET hostel_name=?, address=?, city=?, total_rooms=?, available_rooms=?, " +
                 "contact_number=?, email=?, warden_name=?, warden_phone=?, status=? " +
                 "WHERE ownerId=?";
 
@@ -253,7 +273,7 @@ public class OwnerDAO {
     // 1. Get all Reviews  (Including Owner Reply)
     public List<Map<String, Object>> getAllReviews() {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT id, studentName, rating, comment, status, ownerReply, created_at FROM reviews ORDER BY created_at DESC";
+        String sql = "SELECT id, studentName, rating, comment, status, ownerReply, created_at FROM dbo.reviews ORDER BY created_at DESC";
         try (Connection con = getConnection(); Statement st = con.createStatement()) {
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
@@ -275,9 +295,9 @@ public class OwnerDAO {
     public boolean updateReviewStatus(int id, String status) {
         String sql;
         if ("Deleted".equals(status)) {
-            sql = "DELETE FROM reviews WHERE id = ?";
+            sql = "DELETE FROM dbo.reviews WHERE id = ?";
         } else {
-            sql = "UPDATE reviews SET status = ? WHERE id = ?";
+            sql = "UPDATE dbo.reviews SET status = ? WHERE id = ?";
         }
 
         try (Connection con = getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
@@ -296,7 +316,7 @@ public class OwnerDAO {
 
     // 3. Owner's Reply  Update
     public boolean updateOwnerReply(int reviewId, String reply) {
-        String sql = "UPDATE reviews SET ownerReply = ?, repliedAt = GETDATE(), status = 'Approved' WHERE id = ?";
+        String sql = "UPDATE dbo.reviews SET ownerReply = ?, repliedAt = GETDATE(), status = 'Approved' WHERE id = ?";
         try (Connection con = getConnection(); PreparedStatement pst = con.prepareStatement(sql)) {
             pst.setString(1, reply);
             pst.setInt(2, reviewId);
