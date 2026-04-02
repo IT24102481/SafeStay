@@ -1,0 +1,560 @@
+-- ============================================
+-- HOSTEL MANAGEMENT SYSTEM - FULL SQL SCRIPT
+-- Includes: Database, All Tables, Views,
+--           Stored Procedures, Triggers, Indexes,
+--           and Sample Data
+-- ============================================
+
+-- ============================================
+-- 1. CREATE DATABASE
+-- ============================================
+CREATE DATABASE hostelManagementDB;
+GO
+
+USE hostelManagementDB;
+GO
+
+-- ============================================
+-- 2. USERS TABLE
+-- ============================================
+CREATE TABLE users (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    userId VARCHAR(20) UNIQUE NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- ============================================
+-- 3. STUDENT DETAILS TABLE
+-- ============================================
+CREATE TABLE student_details (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    userId VARCHAR(20) UNIQUE NOT NULL,
+    fullName VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    address VARCHAR(500) NOT NULL,
+    campus_name VARCHAR(100) NOT NULL,
+    studyYear INT NOT NULL DEFAULT 1,
+    guardian_name VARCHAR(100) NOT NULL,
+    guardian_phone VARCHAR(15) NOT NULL,
+    guardian_relationship VARCHAR(50) NOT NULL DEFAULT 'Parent',
+    emergency_contact VARCHAR(15) NOT NULL DEFAULT 'Not Provided',
+    registration_date DATETIME NOT NULL DEFAULT GETDATE(),
+
+    FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE,
+
+    CONSTRAINT CHK_StudyYear CHECK (studyYear BETWEEN 1 AND 5),
+    CONSTRAINT CHK_Phone CHECK (LEN(phone) >= 10),
+    CONSTRAINT CHK_GuardianPhone CHECK (LEN(guardian_phone) >= 10),
+    CONSTRAINT CHK_EmergencyContact CHECK (
+        (LEN(emergency_contact) >= 10 AND ISNUMERIC(emergency_contact) = 1)
+        OR emergency_contact = 'Not Provided'
+    )
+);
+GO
+
+-- ============================================
+-- 4. STAFF DETAILS TABLE
+-- ============================================
+CREATE TABLE staff_details (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    userId VARCHAR(20) UNIQUE NOT NULL,
+    fullName VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    address VARCHAR(500) NOT NULL,
+    staff_role VARCHAR(50) NOT NULL,
+    company_name VARCHAR(100) NOT NULL,
+    department VARCHAR(50) NOT NULL,
+    work_shift VARCHAR(50) NOT NULL DEFAULT 'Day Shift',
+    join_date DATE NOT NULL DEFAULT GETDATE(),
+    registration_date DATETIME NOT NULL DEFAULT GETDATE(),
+
+    FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+);
+GO
+
+-- ============================================
+-- 5. OWNER TABLE
+-- ============================================
+CREATE TABLE owner (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    userId VARCHAR(20) UNIQUE NOT NULL,
+    fullName VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    address VARCHAR(500),
+    company_name VARCHAR(100),
+    created_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (userId) REFERENCES users(userId) ON DELETE CASCADE
+);
+GO
+
+-- ============================================
+-- 6. HOSTEL TABLE
+-- ============================================
+CREATE TABLE hostel (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    ownerId VARCHAR(20) NOT NULL,
+    hostel_name VARCHAR(100) NOT NULL,
+    address VARCHAR(500) NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    total_rooms INT NOT NULL DEFAULT 0,
+    available_rooms INT NOT NULL DEFAULT 0,
+    contact_number VARCHAR(15) NOT NULL,
+    email VARCHAR(100),
+    warden_name VARCHAR(100),
+    warden_phone VARCHAR(15),
+    status VARCHAR(20) DEFAULT 'Active',
+    created_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (ownerId) REFERENCES owner(userId) ON DELETE CASCADE
+);
+GO
+
+-- ============================================
+-- 7. ROOM TABLE (Enhanced)
+-- ============================================
+CREATE TABLE room (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    hostel_id INT NOT NULL,
+    room_number VARCHAR(20) NOT NULL UNIQUE,
+    floor_number INT NOT NULL,
+    room_type VARCHAR(50) NOT NULL,         -- 'AC', 'Non-AC'
+    capacity INT NOT NULL,                  -- Total capacity (1-5 students)
+    occupied INT DEFAULT 0,                 -- Currently occupied
+    available_slots INT,                    -- Calculated: capacity - occupied
+    price_monthly DECIMAL(10,2) NOT NULL,
+    status VARCHAR(20) DEFAULT 'Available', -- Available, Partially Occupied, Full, Under Maintenance
+
+    -- Bed Information
+    bed_type VARCHAR(50) NOT NULL,          -- 'Single Bed', 'Shared Bed for 2', 'Bunk Beds'
+
+    -- Bathroom Information
+    bathroom_type VARCHAR(50) NOT NULL,     -- 'Attached Bathroom', 'Common Bathroom'
+
+    -- Facilities
+    has_wifi BIT DEFAULT 0,
+    has_study_table BIT DEFAULT 0,
+    has_cupboard BIT DEFAULT 0,
+    has_fan BIT DEFAULT 0,
+    has_ac BIT DEFAULT 0,
+    has_laundry_access BIT DEFAULT 0,
+
+    -- Services
+    has_room_cleaning BIT DEFAULT 0,
+
+    -- Images (multiple paths separated by semicolon)
+    image_paths VARCHAR(MAX),
+
+    -- Additional Information
+    description TEXT,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (hostel_id) REFERENCES hostel(id) ON DELETE CASCADE,
+
+    CONSTRAINT CHK_Floor CHECK (floor_number BETWEEN 1 AND 5),
+    CONSTRAINT CHK_Capacity CHECK (capacity BETWEEN 1 AND 5),
+    CONSTRAINT CHK_Occupied CHECK (occupied >= 0 AND occupied <= capacity),
+    CONSTRAINT CHK_RoomStatus CHECK (status IN ('Available', 'Partially Occupied', 'Full', 'Under Maintenance'))
+);
+GO
+
+-- ============================================
+-- 8. PAYMENT TABLE
+-- ============================================
+CREATE TABLE payment (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    payment_no VARCHAR(50) UNIQUE NOT NULL,
+    studentId VARCHAR(20) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    payment_date DATETIME DEFAULT GETDATE(),
+    payment_method VARCHAR(50) NOT NULL,
+    status VARCHAR(20) DEFAULT 'Completed',
+    created_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (studentId) REFERENCES users(userId)
+);
+GO
+
+-- ============================================
+-- 9. MAINTENANCE TABLE
+-- ============================================
+CREATE TABLE maintenance (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    request_no VARCHAR(50) UNIQUE NOT NULL,
+    studentId VARCHAR(20) NOT NULL,
+    room_id INT NOT NULL,
+    issue_type VARCHAR(50) NOT NULL,
+    description TEXT NOT NULL,
+    priority VARCHAR(20) DEFAULT 'Medium',
+    status VARCHAR(20) DEFAULT 'Pending',
+    created_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (studentId) REFERENCES users(userId),
+    FOREIGN KEY (room_id) REFERENCES room(id)
+);
+GO
+
+-- ============================================
+-- 10. ATTENDANCE TABLE
+-- ============================================
+CREATE TABLE attendance (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    studentId VARCHAR(20) NOT NULL,
+    attendance_date DATE NOT NULL,
+    check_in_time DATETIME,
+    check_out_time DATETIME,
+    status VARCHAR(20) DEFAULT 'Present',
+    marked_by VARCHAR(20),
+    remarks VARCHAR(255),
+    created_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (studentId) REFERENCES users(userId)
+);
+GO
+
+-- ============================================
+-- 11. BOOKING REQUEST TABLE
+-- ============================================
+CREATE TABLE booking_request (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    booking_id VARCHAR(50) UNIQUE NOT NULL,     -- BR001, BR002, etc.
+    student_id VARCHAR(20) NOT NULL,
+    room_id INT NOT NULL,
+
+    -- Student Personal Details
+    student_name VARCHAR(100) NOT NULL,
+    student_age INT NOT NULL,
+    student_phone VARCHAR(15) NOT NULL,
+    student_email VARCHAR(100) NOT NULL,
+
+    -- Guardian Details
+    guardian_name VARCHAR(100) NOT NULL,
+    guardian_phone VARCHAR(15) NOT NULL,
+    guardian_relationship VARCHAR(50) DEFAULT 'Parent',
+
+    -- Booking Details
+    booking_start_date DATE NOT NULL,
+    booking_end_date DATE NOT NULL,
+    duration_months INT NOT NULL,
+
+    -- Special Requests
+    special_requests TEXT,
+
+    -- Payment Information
+    key_money DECIMAL(10,2) NOT NULL,
+    monthly_rent DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    payment_method VARCHAR(50),               -- 'Bank Transfer', 'Online Transfer'
+    payment_status VARCHAR(20) DEFAULT 'Pending', -- Pending, Completed
+
+    -- Booking Status
+    status VARCHAR(20) DEFAULT 'Pending',     -- Pending, Approved, Rejected, Cancelled
+    admin_remarks TEXT,
+
+    -- Timestamps
+    requested_at DATETIME DEFAULT GETDATE(),
+    approved_at DATETIME,
+    approved_by VARCHAR(20),                  -- Admin userId
+
+    FOREIGN KEY (student_id) REFERENCES users(userId) ON DELETE CASCADE,
+    FOREIGN KEY (room_id) REFERENCES room(id),
+
+    CONSTRAINT CHK_BookingAge CHECK (student_age >= 16 AND student_age <= 100),
+    CONSTRAINT CHK_BookingStatus CHECK (status IN ('Pending', 'Approved', 'Rejected', 'Cancelled')),
+    CONSTRAINT CHK_PaymentStatus CHECK (payment_status IN ('Pending', 'Completed')),
+    CONSTRAINT CHK_BookingDates CHECK (booking_end_date > booking_start_date)
+);
+GO
+
+-- ============================================
+-- 12. CONFIRMED BOOKING TABLE
+-- ============================================
+CREATE TABLE confirmed_booking (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    booking_id VARCHAR(50) UNIQUE NOT NULL,   -- CB001, CB002, etc.
+    booking_request_id INT NOT NULL,
+    student_id VARCHAR(20) NOT NULL,
+    room_id INT NOT NULL,
+
+    booking_start_date DATE NOT NULL,
+    booking_end_date DATE NOT NULL,
+
+    payment_completed BIT DEFAULT 0,
+    key_money_paid DECIMAL(10,2) NOT NULL,
+
+    status VARCHAR(20) DEFAULT 'Active',      -- Active, Expired, Cancelled
+
+    confirmed_at DATETIME DEFAULT GETDATE(),
+    confirmed_by VARCHAR(20),                 -- Admin userId
+
+    FOREIGN KEY (booking_request_id) REFERENCES booking_request(id),
+    FOREIGN KEY (student_id) REFERENCES users(userId),
+    FOREIGN KEY (room_id) REFERENCES room(id),
+
+    CONSTRAINT CHK_ConfirmedStatus CHECK (status IN ('Active', 'Expired', 'Cancelled'))
+);
+GO
+
+-- ============================================
+-- 13. INQUIRY TABLE
+-- ============================================
+CREATE TABLE inquiry (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    inquiry_id VARCHAR(50) UNIQUE NOT NULL,   -- INQ001, INQ002, etc.
+    student_id VARCHAR(20) NOT NULL,
+    room_id INT,                              -- Optional: NULL for general inquiries
+
+    subject VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    inquiry_type VARCHAR(50) NOT NULL,        -- 'Room Details', 'Location', 'Photos', 'Facilities', 'General'
+
+    status VARCHAR(20) DEFAULT 'Pending',     -- Pending, Replied, Closed
+
+    created_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (student_id) REFERENCES users(userId) ON DELETE CASCADE,
+    FOREIGN KEY (room_id) REFERENCES room(id),
+
+    CONSTRAINT CHK_InquiryStatus CHECK (status IN ('Pending', 'Replied', 'Closed')),
+    CONSTRAINT CHK_InquiryType CHECK (inquiry_type IN ('Room Details', 'Location', 'Photos', 'Facilities', 'General'))
+);
+GO
+
+-- ============================================
+-- 14. INQUIRY REPLY TABLE
+-- ============================================
+CREATE TABLE inquiry_reply (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    inquiry_id INT NOT NULL,
+    admin_id VARCHAR(20) NOT NULL,
+    reply_message TEXT NOT NULL,
+    replied_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (inquiry_id) REFERENCES inquiry(id) ON DELETE CASCADE,
+    FOREIGN KEY (admin_id) REFERENCES users(userId)
+);
+GO
+
+-- ============================================
+-- 15. INDEXES FOR PERFORMANCE
+-- ============================================
+CREATE INDEX idx_room_status ON room(status, available_slots);
+CREATE INDEX idx_room_price ON room(price_monthly);
+CREATE INDEX idx_booking_student ON booking_request(student_id, status);
+CREATE INDEX idx_inquiry_student ON inquiry(student_id, status);
+GO
+
+-- ============================================
+-- 16. VIEWS
+-- ============================================
+
+-- View: Available Rooms
+CREATE VIEW v_available_rooms AS
+SELECT
+    r.*,
+    h.hostel_name,
+    h.address AS hostel_address,
+    h.city,
+    (r.capacity - r.occupied) AS slots_available
+FROM room r
+JOIN hostel h ON r.hostel_id = h.id
+WHERE r.status IN ('Available', 'Partially Occupied')
+  AND r.occupied < r.capacity;
+GO
+
+-- View: Booking Requests with Details
+CREATE VIEW v_booking_requests AS
+SELECT
+    br.*,
+    r.room_number,
+    r.floor_number,
+    r.room_type,
+    r.price_monthly,
+    h.hostel_name,
+    u.username AS student_username
+FROM booking_request br
+JOIN room r ON br.room_id = r.id
+JOIN hostel h ON r.hostel_id = h.id
+JOIN users u ON br.student_id = u.userId;
+GO
+
+-- ============================================
+-- 17. STORED PROCEDURES
+-- ============================================
+
+-- Procedure: Update Room Status Based on Occupancy
+CREATE PROCEDURE sp_update_room_status
+    @room_id INT
+AS
+BEGIN
+    DECLARE @capacity INT, @occupied INT;
+
+    SELECT @capacity = capacity, @occupied = occupied
+    FROM room WHERE id = @room_id;
+
+    IF @occupied = 0
+        UPDATE room SET status = 'Available', available_slots = @capacity WHERE id = @room_id;
+    ELSE IF @occupied < @capacity
+        UPDATE room SET status = 'Partially Occupied', available_slots = @capacity - @occupied WHERE id = @room_id;
+    ELSE IF @occupied >= @capacity
+        UPDATE room SET status = 'Full', available_slots = 0 WHERE id = @room_id;
+END
+GO
+
+-- ============================================
+-- 18. TRIGGERS
+-- ============================================
+
+-- Trigger: Auto-update available_slots when occupied changes
+CREATE TRIGGER tr_update_available_slots
+ON room
+AFTER UPDATE
+AS
+BEGIN
+    UPDATE room
+    SET available_slots = capacity - occupied,
+        updated_at = GETDATE()
+    WHERE id IN (SELECT id FROM inserted);
+
+    DECLARE @room_id INT;
+    DECLARE room_cursor CURSOR FOR SELECT id FROM inserted;
+
+    OPEN room_cursor;
+    FETCH NEXT FROM room_cursor INTO @room_id;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC sp_update_room_status @room_id;
+        FETCH NEXT FROM room_cursor INTO @room_id;
+    END
+
+    CLOSE room_cursor;
+    DEALLOCATE room_cursor;
+END
+GO
+
+-- ============================================
+-- 19. SAMPLE DATA
+-- ============================================
+
+-- Sample User: Student
+INSERT INTO users (userId, username, password, role)
+VALUES ('STD001', 'rashmi', '123', 'Student');
+
+INSERT INTO student_details
+    (userId, fullName, email, phone, address, campus_name, studyYear,
+     guardian_name, guardian_phone, guardian_relationship, emergency_contact)
+VALUES
+    ('STD001', 'Rashmi Perera', 'rashmi@gmail.com', '0771234567',
+     '123 Main Street, Colombo', 'Colombo Campus', 2,
+     'Mr. Sunil Perera', '0779876543', 'Father', '0112345678');
+
+-- Sample User: Owner
+INSERT INTO users (userId, username, password, role)
+VALUES ('OWN001', 'owner1', '123', 'Owner');
+
+INSERT INTO owner (userId, fullName, email, phone, company_name)
+VALUES ('OWN001', 'John Owner', 'owner@hostel.com', '0771234567', 'SafeStay Hostels');
+
+-- Sample Hostel
+INSERT INTO hostel (ownerId, hostel_name, address, city, total_rooms, available_rooms,
+                    contact_number, email, warden_name, warden_phone, status)
+VALUES ('OWN001', 'SafeStay Main Hostel', '123 Campus Road, Colombo 07', 'Colombo',
+        25, 25, '0112345678', 'info@safestay.com', 'Mr. Silva', '0771234567', 'Active');
+
+-- Sample Rooms (Floor 1)
+INSERT INTO room (hostel_id, room_number, floor_number, room_type, capacity, occupied,
+                  price_monthly, status, bed_type, bathroom_type, has_wifi, has_study_table,
+                  has_cupboard, has_fan, has_ac, has_laundry_access, has_room_cleaning,
+                  description, image_paths)
+VALUES
+(1, '101', 1, 'Non-AC', 1, 0, 8000.00, 'Available', 'Single Bed', 'Attached Bathroom',
+ 1, 1, 1, 1, 0, 1, 1, 'Cozy single room with attached bathroom',
+ 'images/rooms/101_1.jpg;images/rooms/101_2.jpg'),
+
+(1, '102', 1, 'Non-AC', 2, 0, 6500.00, 'Available', 'Single Bed', 'Common Bathroom',
+ 1, 1, 1, 1, 0, 1, 1, 'Shared room for 2 students',
+ 'images/rooms/102_1.jpg'),
+
+(1, '103', 1, 'AC', 2, 1, 9000.00, 'Partially Occupied', 'Single Bed', 'Attached Bathroom',
+ 1, 1, 1, 0, 1, 1, 1, 'AC room for 2 students with attached bathroom',
+ 'images/rooms/103_1.jpg;images/rooms/103_2.jpg'),
+
+-- Floor 2
+(1, '201', 2, 'AC', 1, 0, 12000.00, 'Available', 'Single Bed', 'Attached Bathroom',
+ 1, 1, 1, 0, 1, 1, 1, 'Premium single AC room',
+ 'images/rooms/201_1.jpg;images/rooms/201_2.jpg;images/rooms/201_3.jpg'),
+
+(1, '202', 2, 'Non-AC', 3, 0, 5500.00, 'Available', 'Bunk Beds', 'Common Bathroom',
+ 1, 1, 1, 1, 0, 1, 1, 'Triple sharing with bunk beds',
+ 'images/rooms/202_1.jpg'),
+
+(1, '203', 2, 'AC', 3, 2, 7500.00, 'Partially Occupied', 'Single Bed', 'Attached Bathroom',
+ 1, 1, 1, 0, 1, 1, 1, 'AC triple sharing room',
+ 'images/rooms/203_1.jpg;images/rooms/203_2.jpg'),
+
+-- Floor 3
+(1, '301', 3, 'AC', 2, 0, 9500.00, 'Available', 'Single Bed', 'Attached Bathroom',
+ 1, 1, 1, 0, 1, 1, 1, 'Spacious AC double room',
+ 'images/rooms/301_1.jpg;images/rooms/301_2.jpg'),
+
+(1, '302', 3, 'Non-AC', 4, 0, 5000.00, 'Available', 'Bunk Beds', 'Common Bathroom',
+ 1, 1, 1, 1, 0, 1, 1, 'Four sharing budget room',
+ 'images/rooms/302_1.jpg'),
+
+(1, '303', 3, 'AC', 4, 3, 6000.00, 'Partially Occupied', 'Bunk Beds', 'Attached Bathroom',
+ 1, 1, 1, 0, 1, 1, 1, 'AC four sharing room',
+ 'images/rooms/303_1.jpg;images/rooms/303_2.jpg'),
+
+-- Floor 4
+(1, '401', 4, 'AC', 1, 0, 13000.00, 'Available', 'Single Bed', 'Attached Bathroom',
+ 1, 1, 1, 0, 1, 1, 1, 'Deluxe single AC room with city view',
+ 'images/rooms/401_1.jpg;images/rooms/401_2.jpg;images/rooms/401_3.jpg'),
+
+(1, '402', 4, 'Non-AC', 2, 0, 7000.00, 'Available', 'Single Bed', 'Attached Bathroom',
+ 1, 1, 1, 1, 0, 1, 1, 'Double room with attached bathroom',
+ 'images/rooms/402_1.jpg'),
+
+(1, '403', 4, 'AC', 5, 0, 5500.00, 'Available', 'Bunk Beds', 'Common Bathroom',
+ 1, 1, 1, 0, 1, 1, 1, 'Five sharing AC room',
+ 'images/rooms/403_1.jpg;images/rooms/403_2.jpg'),
+
+-- Floor 5
+(1, '501', 5, 'AC', 1, 0, 14000.00, 'Available', 'Single Bed', 'Attached Bathroom',
+ 1, 1, 1, 0, 1, 1, 1, 'Premium penthouse single room',
+ 'images/rooms/501_1.jpg;images/rooms/501_2.jpg;images/rooms/501_3.jpg'),
+
+(1, '502', 5, 'AC', 2, 0, 10000.00, 'Available', 'Single Bed', 'Attached Bathroom',
+ 1, 1, 1, 0, 1, 1, 1, 'Top floor AC double room',
+ 'images/rooms/502_1.jpg;images/rooms/502_2.jpg'),
+
+(1, '503', 5, 'Non-AC', 3, 0, 6000.00, 'Available', 'Single Bed', 'Common Bathroom',
+ 1, 1, 1, 1, 0, 1, 1, 'Triple sharing top floor',
+ 'images/rooms/503_1.jpg');
+GO
+
+-- Update available_slots after insert
+UPDATE room SET available_slots = capacity - occupied;
+GO
+
+-- ============================================
+-- 20. VERIFICATION QUERIES
+-- ============================================
+SELECT 'Tables Created' AS Info, COUNT(*) AS Count
+FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';
+
+SELECT 'Rooms Created' AS Info, COUNT(*) AS Count FROM room;
+SELECT 'Available Rooms' AS Info, COUNT(*) AS Count FROM room WHERE status IN ('Available', 'Partially Occupied');
+SELECT 'Room Types' AS Info, room_type, COUNT(*) AS Count FROM room GROUP BY room_type;
+SELECT 'Floor Distribution' AS Info, floor_number, COUNT(*) AS Count FROM room GROUP BY floor_number ORDER BY floor_number;
+
+PRINT 'Hostel Management System - Full database setup completed successfully!';
+GO
