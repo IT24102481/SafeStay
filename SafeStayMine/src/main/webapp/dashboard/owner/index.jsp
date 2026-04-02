@@ -815,14 +815,6 @@
             <i class="fas fa-door-open"></i>
             <span>Rooms</span>
         </a>
-         <a href="<%= request.getContextPath() %>/admin/bookings" class="nav-item">
-                    <i class="fas fa-door-open"></i>
-                    <span>Bookings</span>
-                </a>
-                <a href="<%= request.getContextPath() %>/admin/inquiries" class="nav-item">
-                                    <i class="fas fa-door-open"></i>
-                                    <span>Inquiries</span>
-                                </a>
         <a href="<%= request.getContextPath() %>/dashboard/owner/payments" class="nav-item">
             <i class="fas fa-credit-card"></i>
             <span>Payments</span>

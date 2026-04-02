@@ -2,6 +2,20 @@ SET ANSI_NULLS ON;
 SET QUOTED_IDENTIFIER ON;
 GO
 
+IF COL_LENGTH('dbo.room', 'image_paths') IS NOT NULL
+BEGIN
+    ALTER TABLE dbo.room ALTER COLUMN image_paths NVARCHAR(MAX) NULL;
+END
+GO
+
+UPDATE dbo.room
+SET available_slots = CASE
+    WHEN occupied <= capacity THEN capacity - occupied
+    ELSE 0
+END
+WHERE available_slots IS NULL;
+GO
+
 CREATE OR ALTER PROCEDURE dbo.sp_update_room_status
     @room_id INT
 AS
@@ -25,7 +39,7 @@ GO
 
 CREATE OR ALTER TRIGGER dbo.tr_update_available_slots
 ON dbo.room
-AFTER UPDATE
+AFTER INSERT, UPDATE
 AS
 BEGIN
     SET NOCOUNT ON;

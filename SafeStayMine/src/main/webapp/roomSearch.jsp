@@ -734,7 +734,11 @@
                 <% int idx = 0; for (Room room : rooms) { idx++; %>
                 <div class="room-card" style="animation-delay:<%= idx * 0.06 %>s;">
                     <div class="room-card-img">
-                        <img src="<%= request.getContextPath() + "/" + room.getFirstImage() %>"
+                        <%
+                            String firstImage = room.getFirstImage();
+                            String roomImageSrc = firstImage.startsWith("data:image") ? firstImage : request.getContextPath() + "/" + firstImage;
+                        %>
+                        <img src="<%= roomImageSrc %>"
                              alt="Room <%= room.getRoomNumber() %>"
                              onerror="this.src='images/rooms/default.jpg'">
                         <span class="room-avail-badge <%= room.isAvailable() ? "badge-available" : "badge-full" %>">

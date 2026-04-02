@@ -92,11 +92,11 @@ public class RoomDAO {
     // ============================================
     public boolean addRoom(Room room) {
         String sql = "INSERT INTO dbo.room " +
-                "(hostel_id, room_number, floor_number, room_type, capacity, occupied, " +
+                "(hostel_id, room_number, floor_number, room_type, capacity, occupied, available_slots, " +
                 "price_monthly, status, bed_type, bathroom_type, " +
                 "has_wifi, has_study_table, has_cupboard, has_fan, has_ac, " +
                 "has_laundry_access, has_room_cleaning, description, image_paths) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection con = getConnection();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -107,19 +107,20 @@ public class RoomDAO {
             pst.setString(4, room.getRoomType());
             pst.setInt(5, room.getCapacity());
             pst.setInt(6, room.getOccupied());
-            pst.setBigDecimal(7, room.getPriceMonthly());
-            pst.setString(8, room.getStatus() != null ? room.getStatus() : "Available");
-            pst.setString(9, room.getBedType());
-            pst.setString(10, room.getBathroomType());
-            pst.setBoolean(11, room.isHasWifi());
-            pst.setBoolean(12, room.isHasStudyTable());
-            pst.setBoolean(13, room.isHasCupboard());
-            pst.setBoolean(14, room.isHasFan());
-            pst.setBoolean(15, room.isHasAc());
-            pst.setBoolean(16, room.isHasLaundryAccess());
-            pst.setBoolean(17, room.isHasRoomCleaning());
-            pst.setString(18, room.getDescription());
-            pst.setString(19, room.getImagePaths() != null ? room.getImagePaths() : "images/rooms/default.jpg");
+            pst.setInt(7, Math.max(0, room.getCapacity() - room.getOccupied()));
+            pst.setBigDecimal(8, room.getPriceMonthly());
+            pst.setString(9, room.getStatus() != null ? room.getStatus() : "Available");
+            pst.setString(10, room.getBedType());
+            pst.setString(11, room.getBathroomType());
+            pst.setBoolean(12, room.isHasWifi());
+            pst.setBoolean(13, room.isHasStudyTable());
+            pst.setBoolean(14, room.isHasCupboard());
+            pst.setBoolean(15, room.isHasFan());
+            pst.setBoolean(16, room.isHasAc());
+            pst.setBoolean(17, room.isHasLaundryAccess());
+            pst.setBoolean(18, room.isHasRoomCleaning());
+            pst.setString(19, room.getDescription());
+            pst.setString(20, room.getImagePaths() != null ? room.getImagePaths() : "images/rooms/default.jpg");
 
             int result = pst.executeUpdate();
             return result > 0;

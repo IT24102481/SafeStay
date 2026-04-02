@@ -775,7 +775,11 @@
             %>
             <div class="room-card" style="animation-delay: <%= (cardIdx * 0.06) %>s;">
                 <div class="room-image-wrap">
-                    <img src="<%= request.getContextPath() + "/" + room.getFirstImage() %>"
+                    <%
+                        String firstImage = room.getFirstImage();
+                        String roomImageSrc = firstImage.startsWith("data:image") ? firstImage : request.getContextPath() + "/" + firstImage;
+                    %>
+                    <img src="<%= roomImageSrc %>"
                          class="room-image"
                          alt="Room <%= room.getRoomNumber() %>"
                          onerror="this.src='images/rooms/default.jpg'">

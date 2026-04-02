@@ -502,9 +502,10 @@
                 <%
                     List<String> images = room.getImageList();
                     String firstImg = images != null && !images.isEmpty() ? images.get(0) : "images/rooms/default.jpg";
+                    String firstImgSrc = firstImg.startsWith("data:image") ? firstImg : request.getContextPath() + "/" + firstImg;
                 %>
                 <img id="mainImg"
-                     src="<%= request.getContextPath() + "/" + firstImg %>"
+                     src="<%= firstImgSrc %>"
                      class="gallery-main"
                      alt="Room <%= room.getRoomNumber() %>"
                      onerror="this.src='images/rooms/default.jpg'">
@@ -512,12 +513,14 @@
                 <% if (images != null && images.size() > 1) { %>
                 <div class="gallery-thumbs">
                     <% for (int i = 0; i < images.size(); i++) {
-                        String img = images.get(i); %>
-                        <img src="<%= request.getContextPath() + "/" + img %>"
+                        String img = images.get(i);
+                        String imgSrc = img.startsWith("data:image") ? img : request.getContextPath() + "/" + img;
+                    %>
+                        <img src="<%= imgSrc %>"
                              class="gallery-thumb <%= i == 0 ? "active" : "" %>"
                              alt="Room <%= room.getRoomNumber() %>"
                              onerror="this.src='images/rooms/default.jpg'"
-                             onclick="switchImage(this, '<%= request.getContextPath() + "/" + img %>')">
+                             onclick="switchImage(this, this.src)">
                     <% } %>
                 </div>
                 <% } %>

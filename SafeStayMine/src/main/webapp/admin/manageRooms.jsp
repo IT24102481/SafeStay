@@ -12,6 +12,9 @@
     Room editRoom = (Room) request.getAttribute("editRoom");
     String mode = (String) request.getAttribute("mode");
     Integer defaultHostelId = (Integer) request.getAttribute("defaultHostelId");
+    String sidebarOwnerName = user.getFullName() != null && !user.getFullName().trim().isEmpty()
+            ? user.getFullName().trim() : "Hostel Owner";
+    char sidebarOwnerInitial = Character.toUpperCase(sidebarOwnerName.charAt(0));
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,8 +52,113 @@
             font-family: 'DM Sans', sans-serif;
             font-size: 15px;
             min-height: 100vh;
+        }
+
+        .owner-sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .owner-sidebar-header {
+            padding: 30px 25px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .owner-sidebar-header h2 {
+            font-size: 28px;
+            font-weight: 700;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #fff;
+            margin: 0;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .owner-sidebar-header h2 i { color: #4f46e5; }
+
+        .owner-profile {
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .owner-avatar {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin: 0 auto 15px;
+            border: 4px solid rgba(255,255,255,0.2);
+            color: #fff;
+            font-family: 'Fraunces', serif;
+        }
+        .owner-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        .owner-id {
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.1);
+            padding: 5px 15px;
+            border-radius: 50px;
+            display: inline-block;
+        }
+        .owner-nav-menu { padding: 20px 0; }
+        .owner-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+        .owner-nav-item:hover,
+        .owner-nav-item.active {
+            background: rgba(79, 70, 229, 0.2);
+            color: #fff;
+            border-left-color: #4f46e5;
+        }
+        .owner-nav-item i {
+            width: 25px;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+
+        .bookings-view {
+            display: none;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        .bookings-frame {
+            width: 100%;
+            min-height: calc(100vh - 4rem);
+            border: none;
+            border-radius: var(--radius);
+            background: var(--surface);
+            box-shadow: 0 2px 16px rgba(0,0,0,0.05);
         }
 
         /* ── PAGE BODY ── */
@@ -513,6 +621,19 @@
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
             .page-body { padding: 1.25rem; }
+            .bookings-view { padding: 1.25rem; }
+            .bookings-frame { min-height: 72vh; }
+        }
+
+        @media (max-width: 992px) {
+            .owner-sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+            }
+            .main-content {
+                margin-left: 0;
+            }
         }
 
         /* ── ANIMATIONS ── */
@@ -529,8 +650,40 @@
 </head>
 <body>
 
+    <div class="owner-sidebar">
+        <div class="owner-sidebar-header">
+            <h2>
+                <i class="fas fa-hotel"></i>
+                <span>SafeStay</span>
+            </h2>
+        </div>
+
+        <div class="owner-profile">
+            <div class="owner-avatar"><%= sidebarOwnerInitial %></div>
+            <div class="owner-name"><%= sidebarOwnerName %></div>
+            <div class="owner-id"><i class="fas fa-id-card"></i> <%= user.getUserId() %></div>
+        </div>
+
+        <div class="owner-nav-menu">
+            <a href="#" id="sidebarRoomsLink" class="owner-nav-item active">
+                <i class="fas fa-door-open"></i>
+                <span>Rooms</span>
+            </a>
+            <a href="#" id="sidebarBookingsLink" class="owner-nav-item" data-bookings-url="<%= request.getContextPath() %>/admin/bookings">
+                <i class="fas fa-calendar-check"></i>
+                <span>Bookings</span>
+            </a>
+            <a href="#" id="sidebarInquiriesLink" class="owner-nav-item" data-inquiries-url="<%= request.getContextPath() %>/admin/inquiries">
+                <i class="fas fa-comments"></i>
+                <span>Inquiries</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+
     <!-- PAGE BODY -->
-    <div class="page-body">
+    <div class="page-body" id="roomsView">
 
         <!-- PAGE HEADING -->
         <div class="page-header-row">
@@ -741,9 +894,11 @@
                             <label class="form-label">Current Images</label>
                             <div class="existing-images">
                                 <%
-                                String[] images = editRoom.getImagePaths().split(";");
-                                for (String img : images) { %>
-                                    <img src="<%= request.getContextPath() %>/<%= img.trim() %>"
+                                List<String> images = editRoom.getImageList();
+                                for (String img : images) {
+                                    String imageSrc = img.startsWith("data:image") ? img : request.getContextPath() + "/" + img;
+                                %>
+                                    <img src="<%= imageSrc %>"
                                          alt="Room Image"
                                          onerror="this.src='<%= request.getContextPath() %>/images/rooms/default.jpg'">
                                 <% } %>
@@ -831,7 +986,11 @@
                         %>
                         <tr>
                             <td>
-                                <img src="<%= request.getContextPath() %>/<%= room.getFirstImage() %>"
+                                <%
+                                    String firstImage = room.getFirstImage();
+                                    String thumbSrc = firstImage.startsWith("data:image") ? firstImage : request.getContextPath() + "/" + firstImage;
+                                %>
+                                <img src="<%= thumbSrc %>"
                                      class="room-thumb"
                                      alt="Room <%= room.getRoomNumber() %>"
                                      onerror="this.src='<%= request.getContextPath() %>/images/rooms/default.jpg'">
@@ -892,6 +1051,16 @@
 
     </div><!-- /.page-body -->
 
+    <div class="bookings-view" id="bookingsView">
+        <iframe id="bookingsFrame" class="bookings-frame" title="Bookings Management"></iframe>
+    </div>
+
+    <div class="bookings-view" id="inquiriesView">
+        <iframe id="inquiriesFrame" class="bookings-frame" title="Inquiries Management"></iframe>
+    </div>
+
+    </div><!-- /.main-content -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function confirmDelete(roomId, roomNumber) {
@@ -921,6 +1090,67 @@
                 }
             }
         }
+
+        const roomsView = document.getElementById('roomsView');
+        const bookingsView = document.getElementById('bookingsView');
+        const inquiriesView = document.getElementById('inquiriesView');
+        const bookingsFrame = document.getElementById('bookingsFrame');
+        const inquiriesFrame = document.getElementById('inquiriesFrame');
+        const sidebarRoomsLink = document.getElementById('sidebarRoomsLink');
+        const sidebarBookingsLink = document.getElementById('sidebarBookingsLink');
+        const sidebarInquiriesLink = document.getElementById('sidebarInquiriesLink');
+
+        function showRoomsView() {
+            roomsView.style.display = 'block';
+            bookingsView.style.display = 'none';
+            inquiriesView.style.display = 'none';
+            sidebarRoomsLink.classList.add('active');
+            sidebarBookingsLink.classList.remove('active');
+            sidebarInquiriesLink.classList.remove('active');
+        }
+
+        function showBookingsView() {
+            roomsView.style.display = 'none';
+            bookingsView.style.display = 'block';
+            inquiriesView.style.display = 'none';
+            sidebarBookingsLink.classList.add('active');
+            sidebarRoomsLink.classList.remove('active');
+            sidebarInquiriesLink.classList.remove('active');
+
+            if (!bookingsFrame.dataset.loaded) {
+                bookingsFrame.src = sidebarBookingsLink.dataset.bookingsUrl;
+                bookingsFrame.dataset.loaded = 'true';
+            }
+        }
+
+        function showInquiriesView() {
+            roomsView.style.display = 'none';
+            bookingsView.style.display = 'none';
+            inquiriesView.style.display = 'block';
+            sidebarInquiriesLink.classList.add('active');
+            sidebarRoomsLink.classList.remove('active');
+            sidebarBookingsLink.classList.remove('active');
+
+            if (!inquiriesFrame.dataset.loaded) {
+                inquiriesFrame.src = sidebarInquiriesLink.dataset.inquiriesUrl;
+                inquiriesFrame.dataset.loaded = 'true';
+            }
+        }
+
+        sidebarRoomsLink.addEventListener('click', function (event) {
+            event.preventDefault();
+            showRoomsView();
+        });
+
+        sidebarBookingsLink.addEventListener('click', function (event) {
+            event.preventDefault();
+            showBookingsView();
+        });
+
+        sidebarInquiriesLink.addEventListener('click', function (event) {
+            event.preventDefault();
+            showInquiriesView();
+        });
     </script>
 </body>
 </html>

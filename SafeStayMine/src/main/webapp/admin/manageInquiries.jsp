@@ -58,12 +58,40 @@
         }
 
         /* ── PAGE HEADING ── */
+        .page-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.75rem;
+        }
         .page-heading {
             font-family: 'Fraunces', serif;
             font-size: 1.6rem;
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 1.75rem;
+            margin-bottom: 0;
+        }
+        .btn-back-owner {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            font-size: 0.86rem;
+            font-weight: 600;
+            padding: 0.55rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-back-owner:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
         }
 
         /* ── STATS ── */
@@ -482,7 +510,12 @@
 <div class="page-body">
 
     <!-- PAGE HEADING -->
-    <h1 class="page-heading"><a href="<%= request.getContextPath() %>/dashboard/owner" style="text-decoration:none;color:inherit;">Inquiries Management</a></h1>
+    <div class="page-header-row">
+        <h1 class="page-heading">Inquiries Management</h1>
+        <a href="<%= request.getContextPath() %>/dashboard/owner" class="btn-back-owner">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
 
     <!-- STATS -->
     <div class="stats-grid">

@@ -7,11 +7,12 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +25,6 @@ import java.util.Map;
 public class ManageRoomsServlet extends HttpServlet {
 
     private RoomDAO roomDAO = new RoomDAO();
-    private static final String UPLOAD_DIR = "images/rooms";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -173,7 +173,7 @@ public class ManageRoomsServlet extends HttpServlet {
             }
 
             // Handle image uploads
-            String imagePaths = uploadImages(request, roomNumber);
+            String imagePaths = uploadImages(request);
 
             // Get facilities
             boolean hasWifi = "on".equals(request.getParameter("hasWifi"));
@@ -309,7 +309,7 @@ public class ManageRoomsServlet extends HttpServlet {
             }
 
             // Handle new image uploads
-            String newImagePaths = uploadImages(request, room.getRoomNumber());
+            String newImagePaths = uploadImages(request);
             if (newImagePaths != null && !newImagePaths.isEmpty()) {
                 // If new images uploaded, replace old paths
                 room.setImagePaths(newImagePaths);
@@ -344,71 +344,45 @@ public class ManageRoomsServlet extends HttpServlet {
     }
 
     /**
-     * Upload multiple images and return semicolon-separated paths
+     * Encode uploaded images as Data URI strings and store them in DB.
+     * Delimiter "||" is used to avoid conflicts with ";base64," inside data URIs.
      */
-    private String uploadImages(HttpServletRequest request, String roomNumber) throws IOException, ServletException {
-        // Get the real path to webapp directory
-        String appPath = request.getServletContext().getRealPath("");
-        String uploadPath = appPath + File.separator + UPLOAD_DIR;
+    private String uploadImages(HttpServletRequest request) throws IOException, ServletException {
+        List<String> encodedImages = new ArrayList<>();
 
-        // Create directory if not exists
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
-
-        List<String> imagePaths = new ArrayList<>();
-        int imageCounter = 1;
-
-        // Get all uploaded files
         for (Part part : request.getParts()) {
             if (part.getName().equals("roomImages") && part.getSize() > 0) {
-                String fileName = extractFileName(part);
+                String contentType = part.getContentType();
+                if (contentType == null || !contentType.toLowerCase().startsWith("image/")) {
+                    continue;
+                }
 
-                // Generate unique filename: roomNumber_counter.extension
-                String fileExtension = getFileExtension(fileName);
-                String newFileName = roomNumber + "_" + imageCounter + fileExtension;
+                byte[] imageBytes = readPartBytes(part);
+                if (imageBytes.length == 0) {
+                    continue;
+                }
 
-                // Save file
-                String filePath = uploadPath + File.separator + newFileName;
-                part.write(filePath);
-
-                // Add relative path to list
-                imagePaths.add(UPLOAD_DIR + "/" + newFileName);
-                imageCounter++;
+                String base64 = Base64.getEncoder().encodeToString(imageBytes);
+                encodedImages.add("data:" + contentType + ";base64," + base64);
             }
         }
 
-        // If no images uploaded, return default or null
-        if (imagePaths.isEmpty()) {
+        if (encodedImages.isEmpty()) {
             return null;
         }
 
-        // Join paths with semicolon
-        return String.join(";", imagePaths);
+        return String.join("||", encodedImages);
     }
 
-    /**
-     * Extract filename from part header
-     */
-    private String extractFileName(Part part) {
-        String contentDisposition = part.getHeader("content-disposition");
-        String[] items = contentDisposition.split(";");
-        for (String item : items) {
-            if (item.trim().startsWith("filename")) {
-                return item.substring(item.indexOf("=") + 2, item.length() - 1);
+    private byte[] readPartBytes(Part part) throws IOException {
+        try (InputStream inputStream = part.getInputStream();
+             ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+            byte[] data = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(data)) != -1) {
+                buffer.write(data, 0, bytesRead);
             }
+            return buffer.toByteArray();
         }
-        return "";
-    }
-
-    /**
-     * Get file extension
-     */
-    private String getFileExtension(String fileName) {
-        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0) {
-            return fileName.substring(fileName.lastIndexOf("."));
-        }
-        return ".jpg"; // default
     }
 }

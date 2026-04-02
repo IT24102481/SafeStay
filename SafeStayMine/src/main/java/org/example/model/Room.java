@@ -2,6 +2,7 @@ package org.example.model;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -66,7 +67,31 @@ public class Room {
         if (imagePaths == null || imagePaths.trim().isEmpty()) {
             return Arrays.asList("images/rooms/default.jpg");
         }
-        return Arrays.asList(imagePaths.split(";"));
+
+        String normalizedPaths = imagePaths.trim();
+        String[] rawImages;
+        if (normalizedPaths.startsWith("data:image")) {
+            // Base64 data URI contains ';base64,' so it must not be split by ';'.
+            rawImages = normalizedPaths.contains("||")
+                    ? normalizedPaths.split("\\\\|\\\\|")
+                    : new String[]{normalizedPaths};
+        } else if (normalizedPaths.contains("||")) {
+            rawImages = normalizedPaths.split("\\\\|\\\\|");
+        } else {
+            rawImages = normalizedPaths.split(";");
+        }
+
+        List<String> images = new ArrayList<>();
+        for (String image : rawImages) {
+            if (image != null && !image.trim().isEmpty()) {
+                images.add(image.trim());
+            }
+        }
+
+        if (images.isEmpty()) {
+            return Arrays.asList("images/rooms/default.jpg");
+        }
+        return images;
     }
     
     public String getFirstImage() {
