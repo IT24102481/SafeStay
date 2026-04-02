@@ -5,9 +5,9 @@ import java.sql.*;
 
 public class UserDAO {
     // Change to SQL Server connection
-    private String dbURL = "jdbc:sqlserver://localhost:1433;databaseName=hostelManagementDB;encrypt=true;trustServerCertificate=true";
-    private String dbUser = "sa";
-    private String dbPass = "StrongPassword123!";
+    private String dbURL = "jdbc:sqlserver://localhost:1433;databaseName=hostelManagementDB;encrypt=false;trustServerCertificate=true;";
+    private String dbUser = "admin";
+    private String dbPass = "123456";
 
     public User login(String userId, String password) {
         User user = null;

@@ -7,9 +7,9 @@ import java.sql.*;
 public class OwnerDAO {
 
     private Connection getConnection() throws SQLException {
-        String dbURL = "jdbc:sqlserver://localhost:1433;databaseName=hostelManagementDB;encrypt=true;trustServerCertificate=true";
-        String dbUser = "sa";
-        String dbPass = "StrongPassword123!";
+        String dbURL = "jdbc:sqlserver://localhost:1433;databaseName=hostelManagementDB;encrypt=false;trustServerCertificate=true;";
+        String dbUser = "admin";
+        String dbPass = "123456";
         return DriverManager.getConnection(dbURL, dbUser, dbPass);
     }
 
